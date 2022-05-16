@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
-import '../Models/stock.dart';
+import '../providers/stock.dart';
 
 class Search extends StatefulWidget {
   const Search({Key? key}) : super(key: key);
@@ -17,10 +17,13 @@ class _SearchState extends State<Search> {
   final GlobalKey _searchKey = GlobalKey();
   String addString(list){
     String result = '';
-    for (var element in list) {
-      result+=element+'/';
+    if(list != null && list.isNotEmpty){
+      for (var element in list) {
+        result+=element+'/';
+      }
+      return result.substring(0, result.length-1);
     }
-    return result.substring(0, result.length-1);
+    return "";
   }
   _getSize(){
     if(_searchKey.currentContext != null){
@@ -109,44 +112,41 @@ class _SearchState extends State<Search> {
                   TextField(
                     focusNode: _focusNode,
                     onChanged: (text){
-                      context.read<StorePrice>().getInfoByName(text);
+                      if(text.isNotEmpty){
+                        context.read<StorePrice>().searchByName(text);
+                      }else {
+                        context.read<StorePrice>().searchList.clear();
+                      }
                     },
                     key: _searchKey,
                     textInputAction: TextInputAction.search,
-                    cursorColor: Colors.white,
+                    cursorColor: Colors.black,
                     style: TextStyle(
-                        color: Colors.white, fontSize: 17, height: 1.3),
+                        color: Colors.black, fontSize: 17, height: 1.3),
                     decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(vertical: 10),
                         prefixIcon: Icon(FontAwesomeIcons.magnifyingGlass, size: 20,
-                          color: Colors.white,),
+                          color: Colors.black,),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                             borderSide: BorderSide.none
                         ),
-                        fillColor: Color(0xffCECECE),
+                        fillColor: Color(0xFFE2E2E2),
                         filled: true,
                         hintText: '종목 검색...',
                         hintStyle: TextStyle(
-                          color: Colors.white, letterSpacing: 1.3,)
+                          color: Colors.black, letterSpacing: 1.3,)
                     ),
                   ),
                   context.watch<StorePrice>().searchList.isNotEmpty ? Container(
-                    margin: EdgeInsets.symmetric(horizontal: 15),
+                    margin: EdgeInsets.symmetric(horizontal: 23),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(20),
                           bottomRight: Radius.circular(20)
                       ),
                       color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
-                          blurRadius: 10,
-                          spreadRadius: 1,
-                          offset: const Offset(2,4)
-                        )
-                      ],
+                      boxShadow: kElevationToShadow[2],
                     ),
                     child: ListView.builder(
                       physics: NeverScrollableScrollPhysics(),
@@ -154,7 +154,6 @@ class _SearchState extends State<Search> {
                       shrinkWrap: true,
                       itemCount: context.watch<StorePrice>().searchList.length,
                       itemBuilder: (c, i){
-                        // String name = context.watch<StorePrice>().searchList[i]['name'];
                         return GestureDetector(
                           onTap: (){
                             if(!currentFocus.hasPrimaryFocus){

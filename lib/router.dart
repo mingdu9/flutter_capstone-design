@@ -35,9 +35,5 @@ final router = GoRouter(routes: [
     path: '/welcome',
     builder: (context, state) => const WelcomePage(),
   ),
-  GoRoute(
-    path: '/tutorial',
-    builder: (context, state) => const TutorialRoot(),
-  ),
 
 ]);

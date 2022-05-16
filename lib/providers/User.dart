@@ -9,10 +9,13 @@ class StoreUser extends ChangeNotifier {
   int balance = 0;
   List<dynamic> holdings = [];
   Set<String> tickers = {};
+  Set<dynamic> sumList = {};
 
   defineUser() async {
     var result = {};
     List<String> list = [];
+    List<dynamic> sum = [];
+    // find user document from email
     await firestore.collection('users').doc(auth.currentUser!.email).get()
         .then((value) => result.addAll(value.data()!))
         .onError((error, stackTrace) => print(error));
@@ -21,10 +24,26 @@ class StoreUser extends ChangeNotifier {
     if(holdings.isEmpty){
       tickers.clear();
     }else{
+      // get tickers from holdings
       for (var element in holdings) {
         list.add(element['ticker']);
       }
       tickers.addAll(list.toSet());
+      // get holdings summary
+      for (var element in holdings){
+        var sumResult = {};
+        await firestore.collection('stocks').doc(element['ticker']).collection('data')
+            .orderBy('date', descending: true).limit(1).get()
+            .then((value) => sumResult.addAll(value.docs.first.data()))
+            .catchError((error) => print(error));
+        await firestore.collection('stocks').doc(element['ticker']).get()
+            .then((value) {
+              sumResult.addAll(value.data()!);
+        }).catchError((error) => print(error));
+        sum.add(sumResult);
+      }
+      sumList.clear();
+      sumList.addAll(sum);
     }
     notifyListeners();
   }
@@ -36,7 +55,7 @@ class StoreUser extends ChangeNotifier {
    }).then((value) => print('update balance'))
     .onError((error, stackTrace) => print('error occurs'));
    defineUser();
-   print('updateBalance: $balance');
+   print('updated Balance: $balance');
    notifyListeners();
   }
 
@@ -51,9 +70,9 @@ class StoreUser extends ChangeNotifier {
       'holdings': holdings,
     }).then((value) => print('update count'))
         .onError((error, stackTrace) => print(stackTrace));
-    print('updatecount holdings: ${holdings}');
-    print('updatecount tickers: ${tickers}');
-    defineUser();
+    print('count updated holdings: ${holdings}');
+    print('count updated tickers: ${tickers}');
+    //defineUser();
     notifyListeners();
   }
 
@@ -66,8 +85,9 @@ class StoreUser extends ChangeNotifier {
     await firestore.collection('users').doc(auth.currentUser!.email).update({
       'holdings': holdings,
     });
-    defineUser();
+    //defineUser();
     notifyListeners();
   }
+
 
 }

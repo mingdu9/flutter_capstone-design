@@ -1,4 +1,4 @@
-import 'package:capstone1/Models/stock.dart';
+import 'package:capstone1/providers/stock.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';

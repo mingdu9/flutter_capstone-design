@@ -4,13 +4,12 @@ import 'package:is_first_run/is_first_run.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'Models/User.dart';
-import 'Models/stock.dart';
+import 'providers/User.dart';
+import 'providers/stock.dart';
 import 'authPage/userPage.dart';
 import 'firebase_options.dart';
 
 import 'firstPages/firstPage.dart';
-import 'firstPages/firstTutorial.dart';
 import 'rankPage/ranking.dart';
 import 'homePage/home.dart';
 import 'router.dart';
@@ -28,9 +27,7 @@ void main() async {
   runApp(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (c) => StoreFirstRun()),
           ChangeNotifierProvider(create: (c) => StoreTabs()),
-          ChangeNotifierProvider(create: (c) => StoreBool()),
           ChangeNotifierProvider(create: (c) => StoreUser()),
           ChangeNotifierProvider(create: (c) => StorePrice()),
         ],
@@ -41,21 +38,6 @@ void main() async {
   );
 }
 
-class StoreFirstRun extends ChangeNotifier{
-  bool firstRun = false;
-
-  setFirstRun() async {
-    bool result = await IsFirstRun.isFirstRun();
-    // print(result);
-    firstRun = result;
-    notifyListeners();
-  }
-
-  setReset() async {
-    await IsFirstRun.reset();
-  }
-}
-
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -63,12 +45,14 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with TickerProviderStateMixin{
+class _MyAppState extends State<MyApp> {
 
-  late TabController tabController;
+  bool? _isFirstRun;
 
-  void _handleTabSelection(){
+  void _checkFirstRun() async {
+    bool ifr = await IsFirstRun.isFirstRun();
     setState(() {
+      _isFirstRun = ifr;
     });
   }
 
@@ -76,15 +60,14 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin{
   void initState() {
     // TODO: implement initState
     super.initState();
-    tabController = TabController(length: 4, vsync: this);
-    tabController.addListener(_handleTabSelection);
-    context.read<StoreFirstRun>().setFirstRun();
+    //context.read<StoreFirstRun>().setFirstRun();
+    _checkFirstRun();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: context.watch<StoreFirstRun>().firstRun == false ? TabContainer(tab: '0',) : RunPage(),
+        body: _isFirstRun == false ? TabContainer(tab: '0',) : RunPage(),
     );
   }
 }
@@ -103,7 +86,6 @@ class _TabContainerState extends State<TabContainer> with TickerProviderStateMix
 
   void _handleTabSelection(){
     setState(() {
-
     });
   }
 

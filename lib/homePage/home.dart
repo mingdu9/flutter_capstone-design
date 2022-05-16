@@ -1,5 +1,4 @@
-import 'package:capstone1/Models/User.dart';
-import 'package:capstone1/Models/stock.dart';
+import 'package:capstone1/providers/User.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -137,3 +136,4 @@ class _BalanceBoxState extends State<BalanceBox> {
     );
   }
 }
+

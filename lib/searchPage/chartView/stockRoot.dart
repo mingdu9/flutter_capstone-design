@@ -1,5 +1,5 @@
-import 'package:capstone1/Models/User.dart';
-import 'package:capstone1/Models/stock.dart';
+import 'package:capstone1/providers/User.dart';
+import 'package:capstone1/providers/stock.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';

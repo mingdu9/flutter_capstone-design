@@ -1,5 +1,4 @@
-import 'package:capstone1/Models/User.dart';
-import 'package:capstone1/Models/stock.dart';
+import 'package:capstone1/providers/User.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -16,32 +15,15 @@ class HoldingsBox extends StatefulWidget {
 
 class _HoldingsBoxState extends State<HoldingsBox> {
 
-  getData()async{
-    await context.read<StoreUser>().defineUser();
-  }
-
-  getSumByTicker(ticker) async {
-    var info = {};
-    await firestore.collection('stocks').doc(ticker).collection('data')
-        .orderBy('date', descending: true).limit(1).get()
-        .then((value) => info.addAll(value.docs.first.data()))
-        .catchError((e) => print(e));
-    await firestore.collection('stocks').doc(ticker).get()
-        .then((value) {info.addAll(value.data()!);
-    }).catchError((e) => print(e));
-    return info;
-  }
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getData();
   }
 
   @override
   Widget build(BuildContext context) {
-    getData();
+    var summaries = context.watch<StoreUser>().sumList;
     var mainStyle = BoxDecoration(
       color: Colors.white,
       boxShadow: [
@@ -49,7 +31,7 @@ class _HoldingsBoxState extends State<HoldingsBox> {
           color: Colors.grey.withOpacity(0.5),
           spreadRadius: 1,
           blurRadius: 7,
-          offset: const Offset(4,8),
+          offset: const Offset(4, 8),
         )
       ],
       borderRadius: BorderRadius.circular(8.0),
@@ -59,6 +41,7 @@ class _HoldingsBoxState extends State<HoldingsBox> {
       fontWeight: FontWeight.bold,
       letterSpacing: -2.0,
     );
+
     return Container(
       margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
       padding: EdgeInsets.all(20),
@@ -66,96 +49,93 @@ class _HoldingsBoxState extends State<HoldingsBox> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('보유 종목', style: titleStyle,),
-          Divider(thickness: 1.0, color: Colors.grey.withOpacity(0.7), ),
-          context.watch<StoreUser>().tickers.isEmpty ? Center(child: Text('없음', style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87
-          ),),) :
-          // (tickers.isEmpty ? Center(child: Text('없음', style: TextStyle(
-          //     fontSize: 17,
-          //     fontWeight: FontWeight.bold,
-          //     color: Colors.black87
-          // ),),) :
-          Column(
-            children: context.watch<StoreUser>().holdings.map((element){
-              var summary = getSumByTicker(element['ticker']);
-              return FutureBuilder(
-                  future: summary,
-                  builder: (BuildContext context, AsyncSnapshot snapshot){
-                    if(snapshot.hasData){
-                      return GestureDetector(
-                          onTap: (){
-                            GoRouter.of(context).go('/mainTab/0/stockDetail/${element['ticker']}');
-                          },
-                          child: Column(
+          Text(
+            '보유 종목',
+            style: titleStyle,
+          ),
+          Divider(
+            thickness: 1.0,
+            color: Colors.grey.withOpacity(0.7),
+          ),
+          context.watch<StoreUser>().tickers.isEmpty
+              ? Center(
+                  child: Text(
+                    '없음',
+                    style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87),
+                  ),
+                )
+              : ListView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: context.read<StoreUser>().tickers.length,
+                  itemBuilder: (context, index) {
+                    final currentSum = summaries.elementAt(index);
+                    return GestureDetector(
+                      onTap: (){
+                        GoRouter.of(context).go('/mainTab/0/stockDetail/${currentSum['ticker']}');
+                      },
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      margin: EdgeInsets.all(10),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text('${snapshot.data['name']}', style: TextStyle(
-                                              fontWeight: FontWeight.w400,
-                                              letterSpacing: -1.2,
-                                              fontSize: 17
-                                          ),),
-                                          Text('${snapshot.data['index']}', style: TextStyle(
-                                              letterSpacing: -1.2,
-                                              color: Colors.grey
-                                          ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
+                              Expanded(
+                                child: Container(
+                                  margin: EdgeInsets.all(10),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text('${snapshot.data['closingPrice']}원', style: TextStyle(
-                                          fontSize: 23,
-                                          color: snapshot.data['fluctuation'] > 0 ? Colors.red : Colors
-                                              .blueAccent
+                                      Text('${currentSum['name']}', style: TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          letterSpacing: -1.2,
+                                          fontSize: 17
                                       ),),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: snapshot.data['fluctuation'] > 0 ?
-                                        [
-                                          Icon(Icons.arrow_drop_up_rounded, color: Colors.red),
-                                          Text('${snapshot.data['fluctuation']} %',
-                                            style: TextStyle(fontSize: 15, color: Colors.red),)
-                                        ] :
-                                        [
-                                          Icon(
-                                            Icons.arrow_drop_down_rounded, color: Colors.blue,),
-                                          Text('${snapshot.data['fluctuation']} %',
-                                            style: TextStyle(fontSize: 15, color: Colors.blue),)
-                                        ],
+                                      Text('${currentSum['index']}', style: TextStyle(
+                                          letterSpacing: -1.2,
+                                          color: Colors.grey
                                       ),
+                                      )
                                     ],
-                                  )
-                                ],
+                                  ),
+                                ),
                               ),
-                              Divider(thickness: 0.5, color: Colors.grey.withOpacity(0.7),)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text('${currentSum['closingPrice']}원', style: TextStyle(
+                                      fontSize: 23,
+                                      color: currentSum['fluctuation'] > 0 ? Colors.red : Colors
+                                          .blueAccent
+                                  ),),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: currentSum['fluctuation'] > 0 ?
+                                    [
+                                      Icon(Icons.arrow_drop_up_rounded, color: Colors.red),
+                                      Text('${currentSum['fluctuation']} %',
+                                        style: TextStyle(fontSize: 15, color: Colors.red),)
+                                    ] :
+                                    [
+                                      Icon(
+                                        Icons.arrow_drop_down_rounded, color: Colors.blue,),
+                                      Text('${currentSum['fluctuation']} %',
+                                        style: TextStyle(fontSize: 15, color: Colors.blue),)
+                                    ],
+                                  ),
+                                ],
+                              )
                             ],
                           ),
-                      );
-                    }else if(snapshot.hasError){
-                      return Center(child: Text('${snapshot.error}'));
-                    }else{
-                      return Center(
-                          child: CircularProgressIndicator()
-                      );
-                    }
-                  }
-              );
-            }).toList(),
-          )
+                          Divider(thickness: 0.5, color: Colors.grey.withOpacity(0.7),)
+                        ],
+                      ),
+                    );
+
+                  })
         ],
       ),
     );

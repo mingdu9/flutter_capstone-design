@@ -44,6 +44,21 @@ class StorePrice extends ChangeNotifier{
     notifyListeners();
   }
 
+  searchByName(String name) async {
+    var list = [];
+    list.clear();
+    await firestore.collection('stocks').get()
+        .then((value) => value.docs.forEach((element) => list.add(element.data())))
+        .catchError((error) => print(error));
+    if(list.isNotEmpty && name.isNotEmpty){
+      searchList.clear();
+      for (var value1 in list.where((element) => element['name'].contains(name))){
+        searchList.add(value1);
+      }
+    }
+    notifyListeners();
+  }
+
   getStockRanking()async{
     var result = [];
     await firestore.collection('stocks').orderBy("volume", descending: true).limit(10).get()
@@ -58,4 +73,7 @@ class StorePrice extends ChangeNotifier{
     getInfoByTicker(ticker);
     notifyListeners();
   }
+
+
+
 }

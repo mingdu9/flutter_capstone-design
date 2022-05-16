@@ -24,7 +24,7 @@ class _StockState extends State<Stock> {
   final TextEditingController buyController = TextEditingController();
 
   findHoldingNum(List<dynamic> holdings, ticker){
-    print('holdings: ${holdings}');
+    print('holdings: $holdings');
     setState(() {
       if(holdings.isNotEmpty){
         for (int i=0;i<=holdings.length-1;i++) {
@@ -37,7 +37,7 @@ class _StockState extends State<Stock> {
       }else{
         index = -1;
       }
-      print('index: ${index}');
+      print('index: $index');
     });
   }
 
@@ -45,7 +45,7 @@ class _StockState extends State<Stock> {
     await context.read<StorePrice>().setPriceList(widget.ticker);
     await context.read<StoreUser>().defineUser();
     findHoldingNum(context.read<StoreUser>().holdings, widget.ticker);
-    print('index: ${index}');
+    print('index: $index');
   }
 
   @override

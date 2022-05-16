@@ -70,8 +70,8 @@ class StoreUser extends ChangeNotifier {
       'holdings': holdings,
     }).then((value) => print('update count'))
         .onError((error, stackTrace) => print(stackTrace));
-    print('count updated holdings: ${holdings}');
-    print('count updated tickers: ${tickers}');
+    print('count updated holdings: $holdings');
+    print('count updated tickers: $tickers');
     //defineUser();
     notifyListeners();
   }

@@ -37,7 +37,7 @@ class _SearchState extends State<Search> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       setState(() {
         searchHeight = _getSize();
       });

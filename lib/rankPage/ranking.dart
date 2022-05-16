@@ -26,7 +26,7 @@ class _RankingState extends State<Ranking> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       setState(() {
         rankHeight = _getSize();
       });

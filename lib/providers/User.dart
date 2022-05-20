@@ -1,3 +1,5 @@
+import 'package:capstone1/constant/constants.dart';
+import 'package:capstone1/homePage/calculate.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ final firestore = FirebaseFirestore.instance;
 
 class StoreUser extends ChangeNotifier {
   int balance = 0;
+  num profit = 0;
   List<dynamic> holdings = [];
   Set<String> tickers = {};
   Set<dynamic> sumList = {};
@@ -20,6 +23,7 @@ class StoreUser extends ChangeNotifier {
         .then((value) => result.addAll(value.data()!))
         .onError((error, stackTrace) => print(error));
     balance = result['balance'];
+    profit = result['profit'];
     holdings = result['holdings'];
     if(holdings.isEmpty){
       tickers.clear();
@@ -50,8 +54,10 @@ class StoreUser extends ChangeNotifier {
 
   updateBalance(int number) async {
     balance = number;
+    profit = double.parse(calculateRate(balance, INITBALANCE).toStringAsFixed(2));
    await firestore.collection('users').doc(auth.currentUser!.email).update({
      'balance': number,
+     'profit' : profit,
    }).then((value) => print('update balance'))
     .onError((error, stackTrace) => print('error occurs'));
    defineUser();
@@ -59,13 +65,18 @@ class StoreUser extends ChangeNotifier {
    notifyListeners();
   }
 
-  updateCount(int count, int index, ticker)async{
-    if(count <= 0){
+  updateCount(int count, int index, int price, String ticker)async{
+    if(holdings[index]['count']+count <= 0){
       tickers.remove(ticker);
       holdings.removeAt(index);
     }else {
-      holdings[index]['count'] = count;
+      var sum = holdings[index]['average'] * holdings[index]['count'];
+      holdings[index]['count'] = (price < 0 ? holdings[index]['count'] - count
+          : holdings[index]['count'] + count);
+      holdings[index]['average'] = (sum + price * count) / holdings[index]['count'];
     }
+
+    //update firestore
     await firestore.collection('users').doc(auth.currentUser!.email).update({
       'holdings': holdings,
     }).then((value) => print('update count'))
@@ -76,10 +87,11 @@ class StoreUser extends ChangeNotifier {
     notifyListeners();
   }
 
-  addHolding(int count, String ticker) async {
+  addHolding(int price, int count, String ticker) async {
     Map<String, Object> addItem = {
       'ticker': ticker,
       'count': count,
+      'average' : price,
     };
     holdings.add(addItem);
     await firestore.collection('users').doc(auth.currentUser!.email).update({

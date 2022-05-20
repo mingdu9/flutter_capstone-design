@@ -1,4 +1,7 @@
+import 'package:capstone1/constant/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
 import 'package:flutter/material.dart';
 
 final firestore = FirebaseFirestore.instance;
@@ -9,6 +12,32 @@ class StorePrice extends ChangeNotifier{
   var stockList = [];
   var searchList = [];
   Map<String, dynamic> lastPrice = {};
+  var newsList = [];
+  var noticeList = [];
+
+  getNewsByTicker(String ticker) async {
+    newsList.clear();
+    var url = Uri.parse("$URL/news/$ticker");
+    final response = await http.get(url);
+    if(response.statusCode == 200){
+      var json = convert.jsonDecode(convert.utf8.decode(response.bodyBytes)) as List<dynamic>;
+      newsList.addAll(json);
+    }else{
+      print("http error occurred at : ${response.statusCode}");
+    }
+  }
+
+  getNoticeByTicker(String ticker) async {
+    noticeList.clear();
+    var url = Uri.parse("$URL/notice/$ticker");
+    final response = await http.get(url);
+    if(response.statusCode == 200){
+      var json = convert.jsonDecode(convert.utf8.decode(response.bodyBytes)) as List<dynamic>;
+      noticeList.addAll(json);
+    }else{
+      print("http error occurred at : ${response.statusCode}");
+    }
+  }
 
   getPriceByTicker(String ticker) async {
     var result = [];
@@ -33,14 +62,6 @@ class StorePrice extends ChangeNotifier{
     // print(result.data());
     stockInfo['name'] = result['name'];
     stockInfo['index'] = result['index'];
-    notifyListeners();
-  }
-
-  getInfoByName(String name) async {
-    searchList.clear();
-    await firestore.collection('stocks').where('name', isEqualTo: name).get()
-        .then((value) => value.docs.forEach((element) => searchList.add(element.data())))
-        .catchError((error, stackTrace) => print(error));
     notifyListeners();
   }
 
@@ -73,7 +94,4 @@ class StorePrice extends ChangeNotifier{
     getInfoByTicker(ticker);
     notifyListeners();
   }
-
-
-
 }

@@ -1,3 +1,4 @@
+import 'package:capstone1/firstPages/firstTutorial.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:is_first_run/is_first_run.dart';
@@ -33,7 +34,9 @@ void main() async {
         ],
         child: MaterialApp.router(
             routeInformationParser: router.routeInformationParser,
-            routerDelegate: router.routerDelegate),
+            routerDelegate: router.routerDelegate,
+          debugShowCheckedModeBanner: false,
+        ),
       )
   );
 }
@@ -60,14 +63,13 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    //context.read<StoreFirstRun>().setFirstRun();
     _checkFirstRun();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: _isFirstRun == false ? TabContainer(tab: '0',) : RunPage(),
+        body: _isFirstRun == false ? TabContainer(tab: '0',) : WelcomePage(),
     );
   }
 }
@@ -123,7 +125,7 @@ class _TabContainerState extends State<TabContainer> with TickerProviderStateMix
             Tab(
                 icon: tabController.index == 0 ?
                 Icon(Icons.home, color: Color(0xffB484FF)) :
-                Icon(Icons.home, color: Colors.black)
+                Icon(Icons.home_outlined, color: Colors.black)
             ),
             Tab(
                 icon:  tabController.index == 1 ?
@@ -150,11 +152,12 @@ class _TabContainerState extends State<TabContainer> with TickerProviderStateMix
 class Setting extends StatelessWidget {
   const Setting({Key? key}) : super(key: key);
 
+  logout() async {
+    await auth.signOut();
+  }
+
   @override
   Widget build(BuildContext context) {
-    logout() async {
-      await auth.signOut();
-    }
 
     return Container(
       padding: EdgeInsets.all(20),
@@ -175,7 +178,7 @@ class Setting extends StatelessWidget {
                 TextButton(
                     onPressed: (){
                       logout();
-                      context.go('/login');
+                      GoRouter.of(context).go('/login');
                     },
                     child: Text('로그아웃'),
                   style: TextButton.styleFrom(
@@ -198,7 +201,7 @@ class Setting extends StatelessWidget {
               children: [
                 TextButton(
                   onPressed: (){
-                    context.go('/tutorial');
+                    context.go('/welcome');
                   },
                   child: Text('첫 설명 다시보기'),
                   style: TextButton.styleFrom(

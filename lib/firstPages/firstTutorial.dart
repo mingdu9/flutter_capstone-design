@@ -1,24 +1,46 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:capstone1/firstPages/tutorialTabs.dart';
 import 'package:flutter/material.dart';
 
-final auth = FirebaseAuth.instance;
-const img = "https://img.freepik.com/free-vector/stock-market-analysis-illustration_23-2148588123.jpg?w=2000&t=st=1652689917~exp=1652690517~hmac=d71cab9ebb6317193a223533061c0a96bc9e5da03db8028aacbee53700bfd6b2";
-
-class WelcomePage extends StatelessWidget {
+class WelcomePage extends StatefulWidget {
   const WelcomePage({Key? key}) : super(key: key);
+
+  @override
+  State<WelcomePage> createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStateMixin {
+
+  late TabController _tabController;
+
+  @override
+  void initState(){
+    super.initState();
+    _tabController = TabController(length: 3, initialIndex: 0,vsync: this);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        child: Column(
-          children: [
-            Text("환영합니다."),
-            Image.network(img),
-            Text("주식을 쉽게 시작하기 위한 스탁에듀입니다."),
-          ],
+        appBar: AppBar( backgroundColor: Colors.white, elevation: 0,
+          title: TabPageSelector(
+            controller: _tabController,
+            selectedColor: Colors.black,
+          ),
+          centerTitle: true,
         ),
-      )
+        body: Column(
+          children: [
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: const [
+                  FirstTab(), SecondTab(), ThirdTab()
+                ],
+              ),
+            ),
+          ],
+        )
     );
   }
 }
+

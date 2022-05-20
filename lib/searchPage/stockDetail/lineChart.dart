@@ -113,7 +113,7 @@ class _ChartContainerState extends State<ChartContainer> {
                     sideTitles: SideTitles(
                         showTitles: true,
                         interval: 1,
-                        reservedSize: prices[prices.length-1] > 100000 ? 50 : 40,
+                        reservedSize: prices[prices.length-1] > 100000 ? 60 : 50,
                         getTitlesWidget: (value, meta){
                           if(value.toInt() == prices[0]*0.01){
                             return Text('${prices[0]}', style: leftStyle, textAlign: TextAlign.left,);

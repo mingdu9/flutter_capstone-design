@@ -1,5 +1,10 @@
+import 'package:capstone1/providers/User.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:provider/provider.dart';
+
+final auth = FirebaseAuth.instance;
 
 class Ranking extends StatefulWidget {
   const Ranking({Key? key}) : super(key: key);
@@ -115,7 +120,7 @@ class _MyRankState extends State<MyRank> {
                   Container(
                     margin: EdgeInsets.only(right: 5),
                     child: Text(
-                      '14. ',
+                      '{num}. ',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 23,
@@ -124,10 +129,10 @@ class _MyRankState extends State<MyRank> {
                   ),
                   Expanded(
                       child: Text(
-                    '{name}',
+                    '${auth.currentUser!.displayName ?? 'null'}',
                     style: TextStyle(fontSize: 18, letterSpacing: -1.2),
                   )),
-                  Text('40.22%',
+                  Text('${context.watch<StoreUser>().profit} %',
                       style: TextStyle(fontSize: 22, letterSpacing: -1.2))
                 ]),
           ),

@@ -108,30 +108,27 @@ class _BalanceBoxState extends State<BalanceBox> {
         letterSpacing: -2.0
     );
 
-    return ChangeNotifierProvider(
-      create: (c) => StoreUser(),
-      child: Container(
-        margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
-        padding: EdgeInsets.all(20),
-        decoration: mainStyle,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('잔고', style: titleStyle,),
-            Divider(thickness: 1.0, color: Colors.grey.withOpacity(0.5), ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                child: Text("${widget.balance} 원",),
-                onPressed: (){},
-                style: TextButton.styleFrom(
-                  primary: Colors.black,
-                  textStyle: textStyle
-                ),
+    return Container(
+      margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
+      padding: EdgeInsets.all(20),
+      decoration: mainStyle,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('잔고', style: titleStyle,),
+          Divider(thickness: 1.0, color: Colors.grey.withOpacity(0.5), ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              child: Text("${widget.balance} 원",),
+              onPressed: (){},
+              style: TextButton.styleFrom(
+                primary: Colors.black,
+                textStyle: textStyle
               ),
-            )
-          ],
-        ),
+            ),
+          )
+        ],
       ),
     );
   }

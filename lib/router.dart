@@ -1,6 +1,6 @@
 import 'package:capstone1/authPage/userPage.dart';
 import 'package:capstone1/firstPages/firstTutorial.dart';
-import 'package:capstone1/searchPage/chartView/stockRoot.dart';
+import 'package:capstone1/searchPage/stockDetail/stockRoot.dart';
 import 'package:go_router/go_router.dart';
 
 import 'firstPages/firstPage.dart';

@@ -102,19 +102,22 @@ class _TabContainerState extends State<TabContainer> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return auth.currentUser != null ? Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text('capstone', style: TextStyle(color: Colors.black),),
-      ),
-      body: TabBarView(
-        controller: tabController,
-        children: const [
-          Home(),
-          Search(),
-          Ranking(),
-          Setting(),
-        ],
+    if (auth.currentUser != null) {
+      return Scaffold(
+      // appBar: AppBar(
+      //   backgroundColor: Colors.white,
+      //   title: Text('capstone', style: TextStyle(color: Colors.black),),
+      // ),
+      body: SafeArea(
+        child: TabBarView(
+          controller: tabController,
+          children: const [
+            Home(),
+            Search(),
+            Ranking(),
+            Setting(),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomAppBar(
         elevation: 10,
@@ -144,7 +147,10 @@ class _TabContainerState extends State<TabContainer> with TickerProviderStateMix
           ],
         ),
       ),
-    ) : Login();
+    );
+    } else {
+      return Login();
+    }
   }
 }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../providers/stock.dart';
 
@@ -36,6 +37,7 @@ class _SearchState extends State<Search> {
   @override
   void initState() {
     // TODO: implement initState
+    context.read<StorePrice>().getStockRanking();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       setState(() {
@@ -52,13 +54,7 @@ class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     FocusScopeNode currentFocus = FocusScope.of(context);
-    context.read<StorePrice>().getStockRanking();
-    if (context
-        .watch<StorePrice>()
-        .stockList
-        .length != 10) {
-      return Center(child: CircularProgressIndicator(),);
-    } else {
+
       return GestureDetector(
         onTap: (){
           if(!currentFocus.hasPrimaryFocus){
@@ -89,7 +85,44 @@ class _SearchState extends State<Search> {
                         Divider(thickness: 0.9, color: Colors.grey.withOpacity(0.8),),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: ListView.builder(
+                          child: ((context.watch<StorePrice>().stockList.length != 10) ? 
+                              ListView.builder(
+                                physics: NeverScrollableScrollPhysics(),
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemCount: 10,
+                                itemBuilder: (context, index ){
+                                  return Shimmer.fromColors(
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text('${index+1}. ', style: TextStyle(
+                                                    fontSize: 20,
+                                                    letterSpacing: -1.2
+                                                ),),
+                                                Container(
+                                                  height: 20, width: MediaQuery.of(context).size.width * 0.4,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.circular(3)
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Divider(thickness: 0.5, color: Colors.grey.withOpacity(0.5),)
+                                          ],
+                                        ),
+                                      ),
+                                      baseColor: Color(0xFFE0E0E0),
+                                      highlightColor: Color(0xFFF5F5F5)
+                                  );
+                                },
+                              )
+                              : ListView.builder(
                             physics: NeverScrollableScrollPhysics(),
                             scrollDirection: Axis.vertical,
                             shrinkWrap: true,
@@ -97,7 +130,7 @@ class _SearchState extends State<Search> {
                             itemBuilder: (c, i) {
                               return StockRank(count: i);
                             },
-                          ),
+                          ))
                         ),
                       ],
                     ),
@@ -200,7 +233,6 @@ class _SearchState extends State<Search> {
         ),
       );
     }
-  }
 }
 
 class StockRank extends StatelessWidget {

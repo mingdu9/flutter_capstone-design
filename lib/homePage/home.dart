@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shimmer/shimmer.dart';
 
 import 'analysis.dart';
 import 'holding.dart';
@@ -33,13 +34,12 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    getData();
+    //getData();
     const titleStyle = TextStyle(
       fontSize: 30,
       fontWeight: FontWeight.bold,
       letterSpacing: -2.0
     );
-    if(context.watch<StoreUser>().balance >= 0){
       return ListView(
         physics: AlwaysScrollableScrollPhysics(),
         scrollDirection: Axis.vertical,
@@ -59,22 +59,17 @@ class _HomeState extends State<Home> {
               ),
             ],
           ),
-          BalanceBox(balance: context.watch<StoreUser>().balance,),
+          BalanceBox(),
           ReturnBox(),
           HoldingsBox(),
         ],
       );
-    } else{
-      return Center(
-        child: CircularProgressIndicator(),
-      );
     }
   }
-}
+
 
 class BalanceBox extends StatefulWidget {
-  const BalanceBox({Key? key, this.balance}) : super(key: key);
-  final int? balance;
+  const BalanceBox({Key? key}) : super(key: key);
 
   @override
   State<BalanceBox> createState() => _BalanceBoxState();
@@ -84,18 +79,6 @@ class _BalanceBoxState extends State<BalanceBox> {
 
   @override
   Widget build(BuildContext context) {
-    var mainStyle = BoxDecoration(
-      color: Colors.white,
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.5),
-          spreadRadius: 1,
-          blurRadius: 7,
-          offset: const Offset(4,8),
-        )
-      ],
-      borderRadius: BorderRadius.circular(8.0),
-    );
     const titleStyle = TextStyle(
         fontSize: 30,
         fontWeight: FontWeight.bold,
@@ -111,7 +94,18 @@ class _BalanceBoxState extends State<BalanceBox> {
     return Container(
       margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
       padding: EdgeInsets.all(20),
-      decoration: mainStyle,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 1,
+            blurRadius: 7,
+            offset: const Offset(4,8),
+          )
+        ],
+        borderRadius: BorderRadius.circular(8.0),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -119,14 +113,27 @@ class _BalanceBoxState extends State<BalanceBox> {
           Divider(thickness: 1.0, color: Colors.grey.withOpacity(0.5), ),
           Align(
             alignment: Alignment.centerRight,
-            child: TextButton(
-              child: Text("${widget.balance} 원",),
+            child: (context.watch<StoreUser>().balance >= 0 ? TextButton(
+              child: Text("${context.watch<StoreUser>().balance} 원",),
               onPressed: (){},
               style: TextButton.styleFrom(
-                primary: Colors.black,
-                textStyle: textStyle
+                  primary: Colors.black,
+                  textStyle: textStyle
               ),
-            ),
+            ) : Shimmer.fromColors(
+                child: Padding(
+                  padding: const EdgeInsets.all(13.6),
+                  child: Container(
+                    width : MediaQuery.of(context).size.width * 0.3, height: 25,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                baseColor: Color(0xFFE0E0E0),
+                highlightColor: Color(0xFFF5F5F5))
+            )
           )
         ],
       ),

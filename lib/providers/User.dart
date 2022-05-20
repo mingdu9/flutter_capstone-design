@@ -1,5 +1,5 @@
 import 'package:capstone1/constant/constants.dart';
-import 'package:capstone1/homePage/calculate.dart';
+import 'package:capstone1/homePage/profit/calculate.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +8,7 @@ final auth = FirebaseAuth.instance;
 final firestore = FirebaseFirestore.instance;
 
 class StoreUser extends ChangeNotifier {
-  int balance = 0;
+  int balance = -1;
   num profit = 0;
   List<dynamic> holdings = [];
   Set<String> tickers = {};
@@ -100,6 +100,4 @@ class StoreUser extends ChangeNotifier {
     //defineUser();
     notifyListeners();
   }
-
-
 }

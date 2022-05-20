@@ -1,17 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:capstone1/providers/stock.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-
-
 
 openBrowser(String url) async {
   if(await canLaunchUrlString(url)){
     launchUrlString(url, mode: LaunchMode.externalApplication);
   }else{
-    print('can\'t launch');
+    print('can\'t open link');
   }
 }
+
+var shimmerWidget = Shimmer.fromColors(
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          flex: 6,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                height: 17,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(13),
+                  color: Colors.white,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 5),
+              ),
+              Container(
+                width: double.infinity,
+                height: 13,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(13),
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Flexible(
+            flex: 4,
+            child: Container(
+              width: 25,
+              height: 15,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(13),
+                color: Colors.white,
+              ),
+            )
+        )
+      ],
+    ),
+    baseColor: Color(0xFFE0E0E0),
+    highlightColor: Color(0xFFF5F5F5)
+);
 
 class NewsBox extends StatefulWidget {
   const NewsBox({Key? key, this.ticker}) : super(key: key);
@@ -85,8 +132,7 @@ class _NewsBoxState extends State<NewsBox> {
                   index: i,
                 );
               },
-            )
-                : Center(child: Text('없음'),),
+            ) : shimmerWidget
           ],
         ),
       ),
@@ -226,8 +272,7 @@ class _NoticeBoxState extends State<NoticeBox> {
               thickness: 0.8,
               color: Colors.grey.withOpacity(0.8),
             ),
-            context.watch<StorePrice>().noticeList.isNotEmpty
-                ? ListView.builder(
+            context.watch<StorePrice>().noticeList.isNotEmpty ? ListView.builder(
               physics: AlwaysScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
@@ -237,10 +282,7 @@ class _NoticeBoxState extends State<NoticeBox> {
                   index: i,
                 );
               },
-            )
-                : Center(
-              child: Text('없음'),
-            ),
+            ) : shimmerWidget,
           ],
         ),
       ),

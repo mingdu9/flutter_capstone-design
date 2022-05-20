@@ -1,4 +1,4 @@
-import 'package:capstone1/homePage/calculate.dart';
+import 'package:capstone1/homePage/profit/calculate.dart';
 import 'package:capstone1/providers/User.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -42,14 +42,17 @@ class ReturnBox extends StatelessWidget {
                 '수익률',
                 style: titleStyle,
               ),
-              IconButton(onPressed: (){print('more');}, icon: Icon(Icons.arrow_forward_ios))
+              IconButton(
+                  onPressed: (){print('more');},
+                  icon: Icon(Icons.arrow_forward_ios)
+              )
             ],
           ),
           Divider(
             thickness: 1.0,
             color: Colors.grey.withOpacity(0.7),
           ),
-          context.watch<StoreUser>().tickers.isEmpty
+          context.watch<StoreUser>().holdings.isEmpty
               ? Center(
                   child: Text(
                     '없음',
@@ -63,7 +66,7 @@ class ReturnBox extends StatelessWidget {
                   physics: NeverScrollableScrollPhysics(),
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true,
-                  itemCount: summaries.length > 3 ? 3 : summaries.length,
+                  itemCount: summaries.length >= 3 ? 3 : summaries.length,
                   itemBuilder: (context, index) {
                     final currentSummary = summaries.elementAt(index);
                     String rate = calculateRate(currentSummary['closingPrice'], context.watch<StoreUser>().holdings[index]['average']).toStringAsFixed(2);

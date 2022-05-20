@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'lineChart.dart';
 
 class Stock extends StatefulWidget {
@@ -623,12 +624,11 @@ class _StockState extends State<Stock> {
           ),
         ),
       ),
-      body: context.watch<StorePrice>().stockInfo['index'].runtimeType == Null
-          ? Center(child: CircularProgressIndicator())
-          : ListView(
+      body: ListView(
               controller: _scrollController,
               children: [
-                Padding(
+                ( context.watch<StorePrice>().stockInfo['index'].runtimeType == Null ?
+                  loadingWidget(MediaQuery.of(context).size.width) : Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -698,13 +698,25 @@ class _StockState extends State<Stock> {
                       )
                     ],
                   ),
-                ),
-                Container(
+                )),
+                (context.watch<StorePrice>().stockInfo['index'].runtimeType == Null ?
+                  Shimmer.fromColors(
+                      child: Container(
+                        margin: EdgeInsets.only(top: 20, bottom: 20, left: 18, right: 18),
+                        height: MediaQuery.of(context).size.height * 0.4, width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(13),
+                          color: Color(0xFFE0E0E0),
+                        ),
+                      ),
+                      baseColor: Color(0xFFEEEEEE),
+                      highlightColor: Color(0xFFF5F5F5))
+                    : Container(
                   margin:
                       EdgeInsets.only(top: 20, bottom: 20, left: 18, right: 18),
                   child: ChartContainer(),
                   // child: Text('chart')
-                ),
+                )),
                 NewsBox(ticker: widget.ticker),
                 NoticeBox(ticker: widget.ticker),
               ],
@@ -713,3 +725,49 @@ class _StockState extends State<Stock> {
   }
 }
 
+
+Widget loadingWidget(num width) {
+  var boxDecoration = BoxDecoration(
+    borderRadius: BorderRadius.circular(13),
+    color: Colors.white
+  );
+  return Shimmer.fromColors(
+      child: Padding(
+        padding:  EdgeInsets.all(10.0),
+        child: Row( mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Container(
+                    height: 17, width: width * 0.4, decoration: boxDecoration,
+                  ),
+                ),
+                Container(
+                  height: 29, width: width * 0.3, decoration: boxDecoration,
+                ),
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Container(
+                    height: 25, width: width * 0.3, decoration: boxDecoration,
+                  ),
+                ),
+                Container(
+                  height: 15, width: width * 0.2, decoration: boxDecoration,
+                )
+              ],
+            )
+          ],
+        ),
+      ),
+      baseColor: Color(0xFFE0E0E0),
+      highlightColor: Color(0xFFF5F5F5));
+}

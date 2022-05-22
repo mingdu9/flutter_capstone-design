@@ -1,3 +1,4 @@
+import 'package:capstone1/searchPage/term.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -14,8 +15,10 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
+  bool isTyping = false;
   final FocusNode _focusNode = FocusNode();
   final GlobalKey _searchKey = GlobalKey();
+
   String addString(list){
     String result = '';
     if(list != null && list.isNotEmpty){
@@ -54,100 +57,99 @@ class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     FocusScopeNode currentFocus = FocusScope.of(context);
-
-      return GestureDetector(
-        onTap: (){
-          if(!currentFocus.hasPrimaryFocus){
-            currentFocus.unfocus();
-          }
-        },
-        child: Stack(
+    return GestureDetector(
+      onTap: (){
+        if(!currentFocus.hasPrimaryFocus){
+          currentFocus.unfocus();
+        }},
+      child: Stack(
           children: [
-            Container(
-              margin: EdgeInsets.only(top: searchHeight ?? 40),
-              padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ListView(
-                      physics: AlwaysScrollableScrollPhysics(),
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 15, 8, 0),
-                          child: Text("일일 거래량 top 10", style: TextStyle(
-                              fontSize: 25,
-                              letterSpacing: -1.0,
-                              fontWeight: FontWeight.bold
-                          )),
-                        ),
-                        Divider(thickness: 0.9, color: Colors.grey.withOpacity(0.8),),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: ((context.watch<StorePrice>().stockList.length != 10) ? 
-                              ListView.builder(
-                                physics: NeverScrollableScrollPhysics(),
-                                scrollDirection: Axis.vertical,
-                                shrinkWrap: true,
-                                itemCount: 10,
-                                itemBuilder: (context, index ){
-                                  return Shimmer.fromColors(
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Text('${index+1}. ', style: TextStyle(
-                                                    fontSize: 20,
-                                                    letterSpacing: -1.2
-                                                ),),
-                                                Container(
-                                                  height: 20, width: MediaQuery.of(context).size.width * 0.4,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius: BorderRadius.circular(3)
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Divider(thickness: 0.5, color: Colors.grey.withOpacity(0.5),)
-                                          ],
+            ListView(
+              physics: AlwaysScrollableScrollPhysics(),
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              padding: EdgeInsets.all(20),
+              children: [
+                Container(height: searchHeight,),
+                TermBox(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 15, 8, 0),
+                  child: Text("일일 거래량 top 10", style: TextStyle(
+                      fontSize: 25,
+                      letterSpacing: -1.0,
+                      fontWeight: FontWeight.bold
+                  )),
+                ),
+                Divider(),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: ((context.watch<StorePrice>().stockList.length != 10) ?
+                      ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemCount: 10,
+                        itemBuilder: (context, index ){
+                          return Shimmer.fromColors(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('${index+1}. ', style: TextStyle(
+                                            fontSize: 20,
+                                            letterSpacing: -1.2
+                                        ),),
+                                        Container(
+                                          height: 20, width: MediaQuery.of(context).size.width * 0.4,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(3)
+                                          ),
                                         ),
-                                      ),
-                                      baseColor: Color(0xFFE0E0E0),
-                                      highlightColor: Color(0xFFF5F5F5)
-                                  );
-                                },
-                              )
-                              : ListView.builder(
-                            physics: NeverScrollableScrollPhysics(),
-                            scrollDirection: Axis.vertical,
-                            shrinkWrap: true,
-                            itemCount: 10,
-                            itemBuilder: (c, i) {
-                              return StockRank(count: i);
-                            },
-                          ))
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                                      ],
+                                    ),
+                                    Divider(thickness: 0.5, color: Colors.grey.withOpacity(0.5),)
+                                  ],
+                                ),
+                              ),
+                              baseColor: Color(0xFFE0E0E0),
+                              highlightColor: Color(0xFFF5F5F5)
+                          );
+                        },
+                      )
+                      : ListView.builder(
+                    physics: NeverScrollableScrollPhysics(),
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: 10,
+                    itemBuilder: (c, i) {
+                      return StockRank(count: i);
+                    },
+                  ))
+                ),
+              ],
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+            Positioned(
+              top: 20,
+              left: 20,
+              right: 20,
               child: Column(
                 children: [
                   TextField(
                     focusNode: _focusNode,
                     onChanged: (text){
                       if(text.isNotEmpty){
+                        setState((){
+                          isTyping = true;
+                        });
                         context.read<StorePrice>().searchByName(text);
                       }else {
+                        setState((){
+                          isTyping = false;
+                        });
                         context.read<StorePrice>().searchList.clear();
                       }
                     },
@@ -171,7 +173,7 @@ class _SearchState extends State<Search> {
                           color: Colors.black, letterSpacing: 1.3,)
                     ),
                   ),
-                  context.watch<StorePrice>().searchList.isNotEmpty ? Container(
+                  isTyping == true && context.watch<StorePrice>().searchList.isNotEmpty ? Container(
                     margin: EdgeInsets.symmetric(horizontal: 23),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(

@@ -1,4 +1,6 @@
-import 'package:capstone1/providers/User.dart';
+import 'package:capstone1/homePage/loadingShimmer.dart';
+import 'package:capstone1/homePage/profit/calculate.dart';
+import 'package:capstone1/providers/user.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -57,86 +59,78 @@ class _HoldingsBoxState extends State<HoldingsBox> {
             thickness: 1.0,
             color: Colors.grey.withOpacity(0.7),
           ),
-          context.watch<StoreUser>().tickers.isEmpty
-              ? Center(
-                  child: Text(
-                    '없음',
-                    style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87),
-                  ),
-                )
-              : ListView.builder(
-                  physics: NeverScrollableScrollPhysics(),
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: context.read<StoreUser>().tickers.length,
-                  itemBuilder: (context, index) {
-                    final currentSum = summaries.elementAt(index);
-                    return GestureDetector(
-                      onTap: (){
-                        GoRouter.of(context).go('/mainTab/0/stockDetail/${currentSum['ticker']}');
-                      },
-                      child: Column(
+          context.watch<StoreUser>().loading == true ?
+            LoadingShimmer() : (context.watch<StoreUser>().tickers.isEmpty ?
+          Center(
+            child: Text('없음', style: TextStyle(
+                fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black87),
+            ),) : ( ListView.builder(
+              physics: NeverScrollableScrollPhysics(),
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: context.read<StoreUser>().tickers.length,
+              itemBuilder: (context, index) {
+                final currentSum = summaries.elementAt(index);
+                return GestureDetector(
+                  onTap: (){
+                    GoRouter.of(context).go('/mainTab/0/stockDetail/${currentSum['ticker']}');
+                    },
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  margin: EdgeInsets.all(10),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('${currentSum['name']}', style: TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          letterSpacing: -1.2,
-                                          fontSize: 17
-                                      ),),
-                                      Text('${currentSum['index']}', style: TextStyle(
-                                          letterSpacing: -1.2,
-                                          color: Colors.grey
-                                      ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
+                          Expanded(
+                            child: Container(
+                              margin: EdgeInsets.all(10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('${currentSum['closingPrice']}원', style: TextStyle(
-                                      fontSize: 23,
-                                      color: currentSum['fluctuation'] > 0 ? Colors.red : Colors
-                                          .blueAccent
+                                  Text('${currentSum['name']}', style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      letterSpacing: -1.2,
+                                      fontSize: 17
                                   ),),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: currentSum['fluctuation'] > 0 ?
-                                    [
-                                      Icon(Icons.arrow_drop_up_rounded, color: Colors.red),
-                                      Text('${currentSum['fluctuation']} %',
-                                        style: TextStyle(fontSize: 15, color: Colors.red),)
-                                    ] :
-                                    [
-                                      Icon(
-                                        Icons.arrow_drop_down_rounded, color: Colors.blue,),
-                                      Text('${currentSum['fluctuation']} %',
-                                        style: TextStyle(fontSize: 15, color: Colors.blue),)
-                                    ],
+                                  Text('${currentSum['index']}', style: TextStyle(
+                                      letterSpacing: -1.2,
+                                      color: Colors.grey
                                   ),
+                                  )
                                 ],
-                              )
-                            ],
+                              ),
+                            ),
                           ),
-                          Divider(thickness: 0.5, color: Colors.grey.withOpacity(0.7),)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text('${addComma(currentSum['closingPrice'])}원', style: TextStyle(
+                                  fontSize: 23,
+                                  color: currentSum['fluctuation'] > 0 ? Colors.redAccent : Colors.blueAccent
+                              ),),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: currentSum['fluctuation'] > 0 ?
+                                [
+                                  Icon(Icons.arrow_drop_up_rounded, color: Colors.redAccent),
+                                  Text('${currentSum['fluctuation']} %',
+                                    style: TextStyle(fontSize: 15, color: Colors.redAccent),)
+                                ] : [
+                                  Icon(
+                                    Icons.arrow_drop_down_rounded, color: Colors.blue,),
+                                  Text('${currentSum['fluctuation']} %',
+                                    style: TextStyle(fontSize: 15, color: Colors.blue),)
+                                ],
+                              ),
+                            ],
+                          )
                         ],
                       ),
-                    );
-
-                  })
-        ],
+                      Divider(thickness: 0.5, color: Colors.grey.withOpacity(0.7),)
+                    ],
+                  ),
+                );
+              }))),
+        ]
       ),
     );
   }

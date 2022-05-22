@@ -2,23 +2,22 @@ import 'package:capstone1/homePage/profit/calculate.dart';
 import 'package:capstone1/providers/user.dart';
 import 'package:capstone1/providers/stock.dart';
 import 'package:capstone1/searchPage/stockDetail/infoBox.dart';
+import 'package:capstone1/searchPage/stockDetail/lineChart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
-import 'lineChart.dart';
 
-class Stock extends StatefulWidget {
-  const Stock({Key? key, this.tab, this.ticker}) : super(key: key);
-  final ticker;
-  final tab;
+class StockTutorial extends StatefulWidget {
+  const StockTutorial({Key? key, this.prev}) : super(key: key);
+  final prev;
 
   @override
-  State<Stock> createState() => _StockState();
+  State<StockTutorial> createState() => _StockTutorialState();
 }
 
-class _StockState extends State<Stock> {
+class _StockTutorialState extends State<StockTutorial> {
+  final String ticker = 'tutorial';
   int selltotal = 0;
   int buytotal = 0;
   int index = 0;
@@ -57,16 +56,16 @@ class _StockState extends State<Stock> {
   }
 
   getData() async {
-    await context.read<StorePrice>().setPriceList(widget.ticker);
+    await context.read<StorePrice>().setPriceList(ticker);
     await context.read<StoreUser>().defineUser();
+    findHoldingNum(context.read<StoreUser>().holdings, ticker);
     print('index: $index');
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    print('stock detail ticker : ${widget.ticker}');
+    print('stock detail ticker : $ticker');
     getData();
     _scrollController.addListener(() {
       if(_scrollController.hasClients && _scrollController.position.pixels > 0){
@@ -93,7 +92,7 @@ class _StockState extends State<Stock> {
         -count,
         index,
         price,
-        widget.ticker);
+        ticker);
   }
 
   buy(int count) async {
@@ -102,20 +101,19 @@ class _StockState extends State<Stock> {
     int sum = count * price;
     await context.read<StoreUser>().updateBalance(balance - sum);
     if (index < 0) {
-      await context.read<StoreUser>().addHolding(price, count, widget.ticker);
-      index++;
+      await context.read<StoreUser>().addHolding(price, count, ticker);
     } else {
       await context.read<StoreUser>().updateCount(
           count,
           index,
           price,
-          widget.ticker);
+          ticker);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    findHoldingNum(context.read<StoreUser>().holdings, widget.ticker);
+    findHoldingNum(context.read<StoreUser>().holdings, ticker);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -126,19 +124,10 @@ class _StockState extends State<Stock> {
             Icons.arrow_back_ios,
             color: Colors.black,
           ),
-          onPressed: () => GoRouter.of(context).go('/mainTab/${widget.tab}'),
+          onPressed: (){
+              GoRouter.of(context).go('/mainTab/0/stockDetail/${widget.prev}');
+            },
         ),
-        actions: [
-          IconButton(
-              onPressed: () {
-                // print('show tutorial');
-                GoRouter.of(context).go('/stockTutorial/${widget.ticker}');
-              },
-              icon: Icon(
-                Icons.question_mark,
-                color: Colors.black,
-              ))
-        ],
         title: Text(title,
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.values[4]),),
       ),
@@ -191,14 +180,14 @@ class _StockState extends State<Stock> {
                                         children: [
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
                                                 '현재가',
                                                 style: TextStyle(
                                                     fontSize: 23,
                                                     fontWeight:
-                                                        FontWeight.bold),
+                                                    FontWeight.bold),
                                               ),
                                               Text(
                                                 '${addComma(context.watch<StorePrice>().lastPrice['price'])}원',
@@ -210,14 +199,14 @@ class _StockState extends State<Stock> {
                                           ),
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
                                                 '잔고',
                                                 style: TextStyle(
                                                     fontSize: 23,
                                                     fontWeight:
-                                                        FontWeight.bold),
+                                                    FontWeight.bold),
                                               ),
                                               Text(
                                                 '${addComma(context.watch<StoreUser>().balance)}원',
@@ -230,21 +219,21 @@ class _StockState extends State<Stock> {
                                           Divider(height: 10),
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
                                                 '개수',
                                                 style: TextStyle(
                                                     fontSize: 23,
                                                     fontWeight:
-                                                        FontWeight.bold),
+                                                    FontWeight.bold),
                                               ),
                                               Container(
                                                 padding:
-                                                    EdgeInsets.only(bottom: 4),
+                                                EdgeInsets.only(bottom: 4),
                                                 width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
+                                                    .size
+                                                    .width *
                                                     0.3,
                                                 child: TextField(
                                                   controller: buyController,
@@ -256,13 +245,13 @@ class _StockState extends State<Stock> {
                                                     } else {
                                                       setState(() {
                                                         buytotal = context
-                                                                    .read<StorePrice>()
-                                                                    .lastPrice['price'] * int.parse(value);
+                                                            .read<StorePrice>()
+                                                            .lastPrice['price'] * int.parse(value);
                                                       });
                                                     }
                                                   },
                                                   keyboardType:
-                                                      TextInputType.number,
+                                                  TextInputType.number,
                                                   decoration: InputDecoration(
                                                       hintText: '최대 30주씩',
                                                       hintStyle: TextStyle(
@@ -274,14 +263,14 @@ class _StockState extends State<Stock> {
                                           Divider(height: 10),
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
                                                 '총 금액',
                                                 style: TextStyle(
                                                     fontSize: 23,
                                                     fontWeight:
-                                                        FontWeight.bold),
+                                                    FontWeight.bold),
                                               ),
                                               Text(
                                                 '${addComma(buytotal)}원',
@@ -307,10 +296,10 @@ class _StockState extends State<Stock> {
                                             ),
                                             style: ElevatedButton.styleFrom(
                                               textStyle:
-                                                  TextStyle(fontSize: 18),
+                                              TextStyle(fontSize: 18),
                                               shape: RoundedRectangleBorder(
                                                   borderRadius:
-                                                      BorderRadius.circular(13),
+                                                  BorderRadius.circular(13),
                                                   side: BorderSide(
                                                       color: Color(0xffff7d7d),
                                                       width: 2)),
@@ -319,17 +308,16 @@ class _StockState extends State<Stock> {
                                             ),
                                             onPressed: () {
                                               if (int.parse(buyController.text)
-                                                        * context.read<StorePrice>().lastPrice['price'] <=
+                                                  * context.read<StorePrice>().lastPrice['price'] <=
                                                   context.read<StoreUser>().balance) {
                                                 buy(int.parse(buyController.text));
-                                                findHoldingNum(context.read<StoreUser>().holdings, widget.ticker);
                                                 Navigator.pop(context);
                                               } else {
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(
-                                                        const SnackBar(
-                                                            content:
-                                                                Text('매수 실패')));
+                                                    const SnackBar(
+                                                        content:
+                                                        Text('매수 실패')));
                                               }
                                             },
                                           ),
@@ -344,7 +332,7 @@ class _StockState extends State<Stock> {
                                             textStyle: TextStyle(fontSize: 18),
                                             shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(13),
+                                                BorderRadius.circular(13),
                                                 side: BorderSide(
                                                     color: Color(0xff7f7f7f),
                                                     width: 2)),
@@ -374,7 +362,7 @@ class _StockState extends State<Stock> {
                 style: ElevatedButton.styleFrom(
                     elevation: 0,
                     padding:
-                        const EdgeInsets.symmetric(vertical: 9, horizontal: 30),
+                    const EdgeInsets.symmetric(vertical: 9, horizontal: 30),
                     primary: const Color(0xffff7d7d),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(13),
@@ -425,15 +413,15 @@ class _StockState extends State<Stock> {
                                           children: [
                                             Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                              MainAxisAlignment
+                                                  .spaceBetween,
                                               children: [
                                                 Text(
                                                   '현재가',
                                                   style: TextStyle(
                                                       fontSize: 23,
                                                       fontWeight:
-                                                          FontWeight.bold),
+                                                      FontWeight.bold),
                                                 ),
                                                 Text(
                                                   '${addComma(context.watch<StorePrice>().lastPrice['price'])}원',
@@ -445,15 +433,15 @@ class _StockState extends State<Stock> {
                                             ),
                                             Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                              MainAxisAlignment
+                                                  .spaceBetween,
                                               children: [
                                                 Text(
                                                   '보유 개수',
                                                   style: TextStyle(
                                                       fontSize: 23,
                                                       fontWeight:
-                                                          FontWeight.bold),
+                                                      FontWeight.bold),
                                                 ),
                                                 Text(
                                                   '${context.watch<StoreUser>().holdings.isEmpty ? '0' : context.watch<StoreUser>().holdings[index]['count']}주',
@@ -466,22 +454,22 @@ class _StockState extends State<Stock> {
                                             Divider(height: 10),
                                             Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                              MainAxisAlignment
+                                                  .spaceBetween,
                                               children: [
                                                 Text(
                                                   '개수',
                                                   style: TextStyle(
                                                       fontSize: 23,
                                                       fontWeight:
-                                                          FontWeight.bold),
+                                                      FontWeight.bold),
                                                 ),
                                                 Container(
                                                   padding: EdgeInsets.only(
                                                       bottom: 4),
                                                   width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
+                                                      .size
+                                                      .width *
                                                       0.3,
                                                   child: TextField(
                                                     controller: sellController,
@@ -493,16 +481,16 @@ class _StockState extends State<Stock> {
                                                       } else {
                                                         setState(() {
                                                           selltotal = context
-                                                                      .read<
-                                                                          StorePrice>()
-                                                                      .lastPrice[
-                                                                  'price'] *
+                                                              .read<
+                                                              StorePrice>()
+                                                              .lastPrice[
+                                                          'price'] *
                                                               int.parse(text);
                                                         });
                                                       }
                                                     },
                                                     keyboardType:
-                                                        TextInputType.number,
+                                                    TextInputType.number,
                                                     decoration: InputDecoration(
                                                         hintText: '최대 30주씩',
                                                         hintStyle: TextStyle(
@@ -514,15 +502,15 @@ class _StockState extends State<Stock> {
                                             Divider(height: 10),
                                             Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                              MainAxisAlignment
+                                                  .spaceBetween,
                                               children: [
                                                 Text(
                                                   '총 금액',
                                                   style: TextStyle(
                                                       fontSize: 23,
                                                       fontWeight:
-                                                          FontWeight.bold),
+                                                      FontWeight.bold),
                                                 ),
                                                 Text(
                                                   '${addComma(selltotal)}원',
@@ -537,7 +525,7 @@ class _StockState extends State<Stock> {
                                       ),
                                       Row(
                                         mainAxisAlignment:
-                                            MainAxisAlignment.end,
+                                        MainAxisAlignment.end,
                                         children: [
                                           Container(
                                             margin: EdgeInsets.only(right: 8),
@@ -549,14 +537,14 @@ class _StockState extends State<Stock> {
                                               ),
                                               style: ElevatedButton.styleFrom(
                                                 textStyle:
-                                                    TextStyle(fontSize: 18),
+                                                TextStyle(fontSize: 18),
                                                 shape: RoundedRectangleBorder(
                                                     borderRadius:
-                                                        BorderRadius.circular(
-                                                            13),
+                                                    BorderRadius.circular(
+                                                        13),
                                                     side: BorderSide(
                                                         color:
-                                                            Color(0xff2892ff),
+                                                        Color(0xff2892ff),
                                                         width: 2)),
                                                 onPrimary: Color(0xff2892ff),
                                                 primary: Colors.white,
@@ -564,16 +552,16 @@ class _StockState extends State<Stock> {
                                               onPressed: () {
                                                 if (index < 0) {
                                                   ScaffoldMessenger.of(context).showSnackBar(
-                                                          const SnackBar(content: Text('매도 실패')));
+                                                      const SnackBar(content: Text('매도 실패')));
                                                 } else if (int.parse(sellController.text) >=
-                                                        context.read<StoreUser>().holdings[index]['count'] ||
+                                                    context.read<StoreUser>().holdings[index]['count'] ||
                                                     int.parse(sellController.text) <= 30) {
                                                   sell(int.parse(sellController.text));
                                                   Navigator.pop(context);
                                                 } else {
                                                   print(context.read<StoreUser>().holdings[index]['count']);
                                                   ScaffoldMessenger.of(context).showSnackBar(
-                                                          const SnackBar(content: Text('매도 실패')));
+                                                      const SnackBar(content: Text('매도 실패')));
                                                 }
                                               },
                                             ),
@@ -586,10 +574,10 @@ class _StockState extends State<Stock> {
                                             ),
                                             style: ElevatedButton.styleFrom(
                                               textStyle:
-                                                  TextStyle(fontSize: 18),
+                                              TextStyle(fontSize: 18),
                                               shape: RoundedRectangleBorder(
                                                   borderRadius:
-                                                      BorderRadius.circular(13),
+                                                  BorderRadius.circular(13),
                                                   side: BorderSide(
                                                       color: Color(0xff7f7f7f),
                                                       width: 2)),
@@ -620,7 +608,7 @@ class _StockState extends State<Stock> {
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   padding:
-                      const EdgeInsets.symmetric(vertical: 9, horizontal: 30),
+                  const EdgeInsets.symmetric(vertical: 9, horizontal: 30),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(13),
                   ),
@@ -631,102 +619,101 @@ class _StockState extends State<Stock> {
         ),
       ),
       body: ListView(
-              controller: _scrollController,
+        controller: _scrollController,
+        children: [
+          (context.watch<StorePrice>().load == true?
+          loadingWidget(MediaQuery.of(context).size.width) : Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ( context.watch<StorePrice>().load == true ?
-                  loadingWidget(MediaQuery.of(context).size.width) : Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            addString(
-                                context.watch<StorePrice>().stockInfo['index']),
-                            style:
-                                TextStyle(fontSize: 17, color: Colors.black26),
-                          ),
-                          Text(
-                            context.watch<StorePrice>().stockInfo['name'],
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 29,
-                                letterSpacing: -1.2),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '${addComma(context.watch<StorePrice>().lastPrice['price'])}원',
-                            style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.values[5],
-                                color: context
-                                            .watch<StorePrice>()
-                                            .lastPrice['changeRate'] >
-                                        0
-                                    ? Colors.red
-                                    : Colors.blueAccent),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: context
-                                        .watch<StorePrice>()
-                                        .lastPrice['changeRate'] >
-                                    0
-                                ? [
-                                    Icon(Icons.arrow_drop_up_rounded,
-                                        color: Colors.red),
-                                    Text(
-                                      '${context.watch<StorePrice>().lastPrice['changeRate']} %',
-                                      style: TextStyle(
-                                          fontSize: 15, color: Colors.red),
-                                    )
-                                  ]
-                                : [
-                                    Icon(
-                                      Icons.arrow_drop_down_rounded,
-                                      color: Colors.blue,
-                                    ),
-                                    Text(
-                                      '${context.watch<StorePrice>().lastPrice['changeRate']} %',
-                                      style: TextStyle(
-                                          fontSize: 15, color: Colors.blue),
-                                    )
-                                  ],
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                )),
-                (context.watch<StorePrice>().load == true ?
-                  Shimmer.fromColors(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 20, bottom: 20, left: 18, right: 18),
-                        height: MediaQuery.of(context).size.height * 0.4, width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(13),
-                          color: Color(0xFFE0E0E0),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      addString(
+                          context.watch<StorePrice>().stockInfo['index']),
+                      style:
+                      TextStyle(fontSize: 17, color: Colors.black26),
+                    ),
+                    Text(
+                      context.watch<StorePrice>().stockInfo['name'],
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 29,
+                          letterSpacing: -1.2),
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${addComma(context.watch<StorePrice>().lastPrice['price'])}원',
+                      style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.values[5],
+                          color: context
+                              .watch<StorePrice>()
+                              .lastPrice['changeRate'] >
+                              0
+                              ? Colors.red
+                              : Colors.blueAccent),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: context
+                          .watch<StorePrice>()
+                          .lastPrice['changeRate'] >
+                          0
+                          ? [
+                        Icon(Icons.arrow_drop_up_rounded,
+                            color: Colors.red),
+                        Text(
+                          '${context.watch<StorePrice>().lastPrice['changeRate']} %',
+                          style: TextStyle(
+                              fontSize: 15, color: Colors.red),
+                        )
+                      ]
+                          : [
+                        Icon(
+                          Icons.arrow_drop_down_rounded,
+                          color: Colors.blue,
                         ),
-                      ),
-                      baseColor: Color(0xFFEEEEEE),
-                      highlightColor: Color(0xFFF5F5F5))
-                    : Container(
-                  margin:
-                      EdgeInsets.only(top: 20, bottom: 20, left: 18, right: 18),
-                  child: ChartContainer(),
-                  // child: Text('chart')
-                )),
-                NewsBox(ticker: widget.ticker),
-                NoticeBox(ticker: widget.ticker),
+                        Text(
+                          '${context.watch<StorePrice>().lastPrice['changeRate']} %',
+                          style: TextStyle(
+                              fontSize: 15, color: Colors.blue),
+                        )
+                      ],
+                    ),
+                  ],
+                )
               ],
             ),
+          )),
+          (context.watch<StorePrice>().load == true?
+          Shimmer.fromColors(
+              child: Container(
+                margin: EdgeInsets.only(top: 20, bottom: 20, left: 18, right: 18),
+                height: MediaQuery.of(context).size.height * 0.4, width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(13),
+                  color: Color(0xFFE0E0E0),
+                ),
+              ),
+              baseColor: Color(0xFFEEEEEE),
+              highlightColor: Color(0xFFF5F5F5))
+              : Container(
+            margin:
+            EdgeInsets.only(top: 20, bottom: 20, left: 18, right: 18),
+            child: ChartContainer(),
+            // child: Text('chart')
+          )),
+          NewsBox(ticker: ticker),
+        ],
+      ),
     );
   }
 }
@@ -734,8 +721,8 @@ class _StockState extends State<Stock> {
 
 Widget loadingWidget(num width) {
   var boxDecoration = BoxDecoration(
-    borderRadius: BorderRadius.circular(13),
-    color: Colors.white
+      borderRadius: BorderRadius.circular(13),
+      color: Colors.white
   );
   return Shimmer.fromColors(
       child: Padding(

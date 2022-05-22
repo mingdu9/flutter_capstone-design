@@ -109,9 +109,7 @@ class _NewsBoxState extends State<NewsBox> {
                   ),
                 ),
                 IconButton(
-                    onPressed: () => context
-                        .read<StorePrice>()
-                        .getNewsByTicker(widget.ticker),
+                    onPressed: () => context.read<StorePrice>().updateNews(widget.ticker),
                     icon: Icon(
                       Icons.refresh_rounded,
                       color: Colors.black,
@@ -261,7 +259,7 @@ class _NoticeBoxState extends State<NoticeBox> {
                 IconButton(
                     onPressed: () => context
                         .read<StorePrice>()
-                        .getNoticeByTicker(widget.ticker),
+                        .updateNotice(widget.ticker),
                     icon: Icon(
                       Icons.refresh_rounded,
                       color: Colors.black,

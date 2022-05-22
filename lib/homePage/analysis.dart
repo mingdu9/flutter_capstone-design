@@ -1,5 +1,6 @@
+import 'package:capstone1/homePage/loadingShimmer.dart';
 import 'package:capstone1/homePage/profit/calculate.dart';
-import 'package:capstone1/providers/User.dart';
+import 'package:capstone1/providers/user.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -39,11 +40,11 @@ class ReturnBox extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                '수익률',
+                '수익 분석',
                 style: titleStyle,
               ),
               IconButton(
-                  onPressed: (){print('more');},
+                  onPressed: (){GoRouter.of(context).push('/profitDetail');},
                   icon: Icon(Icons.arrow_forward_ios)
               )
             ],
@@ -52,8 +53,8 @@ class ReturnBox extends StatelessWidget {
             thickness: 1.0,
             color: Colors.grey.withOpacity(0.7),
           ),
-          context.watch<StoreUser>().holdings.isEmpty
-              ? Center(
+          ( context.watch<StoreUser>().loading == true ?
+              LoadingShimmer() : (context.watch<StoreUser>().holdings.isEmpty ? Center(
                   child: Text(
                     '없음',
                     style: TextStyle(
@@ -69,6 +70,7 @@ class ReturnBox extends StatelessWidget {
                   itemCount: summaries.length >= 3 ? 3 : summaries.length,
                   itemBuilder: (context, index) {
                     final currentSummary = summaries.elementAt(index);
+                    try{
                     String rate = calculateRate(currentSummary['closingPrice'], context.watch<StoreUser>().holdings[index]['average']).toStringAsFixed(2);
                     num profit = calculateProfit(currentSummary['closingPrice'], context.watch<StoreUser>().holdings[index]['average'], context.watch<StoreUser>().holdings[index]['count']);
                     return GestureDetector(
@@ -113,12 +115,12 @@ class ReturnBox extends StatelessWidget {
                                     children: double.parse(rate) > 0
                                         ? [
                                             Icon(Icons.arrow_drop_up_rounded,
-                                                color: Colors.red),
+                                                color: Colors.redAccent),
                                             Text(
                                               '$rate %',
                                               style: TextStyle(
                                                   fontSize: 23,
-                                                  color: Colors.red),
+                                                  color: Colors.redAccent),
                                             )
                                           ]
                                         : (double.parse(rate) == 0 ? [
@@ -142,11 +144,11 @@ class ReturnBox extends StatelessWidget {
                                           ]),
                                   ),
                                   Text(
-                                    '${profit.ceil()}원',
+                                    '${addComma(profit.ceil())}원',
                                     style: TextStyle(
                                         fontSize: 15,
                                         color: double.parse(rate) > 0
-                                            ? Colors.red
+                                            ? Colors.redAccent
                                             : ( double.parse(rate) == 0 ? Colors.black54 : Colors.blueAccent)),
                                   ),
                                 ],
@@ -160,7 +162,12 @@ class ReturnBox extends StatelessWidget {
                         ],
                       ),
                     );
-                  })
+                    }catch(e){
+                      return Center(
+                        child: Text(e.toString()),
+                      );
+                    }}))
+          )
         ],
       ),
     );

@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
-import 'package:simple_animations/stateless_animation/play_animation.dart';
 
 final auth = FirebaseAuth.instance;
 final firestore = FirebaseFirestore.instance;
@@ -220,12 +219,13 @@ class _SignUpState extends State<SignUp> {
   }
 
   CollectionReference users = firestore.collection('users');
-  Future<void> addUser(email){
+  Future<void> addUser(email, name){
     return users.doc(email).set({
+      'name' : name,
       'balance' : INITBALANCE,
       'holdings' : [],
       'profit' : 0,
-    }).then((value) => print('added')).catchError((e) => print('error: $e'));
+    }).then((_) => print('added')).catchError((e) => print('error: $e'));
   }
 
   @override
@@ -277,7 +277,7 @@ class _SignUpState extends State<SignUp> {
                             },
                             onSaved: (name){
                               if(name!=null){
-                                userData['name'] = name;
+                                userData['name'] = name.trim();
                               }
                             },
                           ),
@@ -296,7 +296,7 @@ class _SignUpState extends State<SignUp> {
                             keyboardType: TextInputType.emailAddress,
                             onSaved: (email){
                               if(email!=null){
-                                userData['email'] = email;
+                                userData['email'] = email.trim();
                               }
                             },
                           ),
@@ -316,7 +316,7 @@ class _SignUpState extends State<SignUp> {
                             keyboardType: TextInputType.emailAddress,
                             onSaved: (password){
                               if(password!=null){
-                                userData['password'] = password;
+                                userData['password'] = password.trim();
                               }
                             },
                           ),
@@ -342,7 +342,7 @@ class _SignUpState extends State<SignUp> {
                             formKey.currentState!.save();
                             bool result = await signup(userData['email'], userData['password'], userData['name']);
                             if(result == true){
-                              addUser(userData['email']);
+                              addUser(userData['email'], userData['name']);
                               GoRouter.of(context).pop();
                             }else{
                               ScaffoldMessenger.of(context).showSnackBar(

@@ -13,6 +13,27 @@ class StoreUser extends ChangeNotifier {
   List<dynamic> holdings = [];
   Set<String> tickers = {};
   Set<dynamic> sumList = {};
+  bool loading = true;
+  List<dynamic> userRanks = [];
+
+  getRank() async {
+    loading= true;
+    List<dynamic> list = [];
+    await firestore.collection('users').orderBy('profit', descending: true).get()
+      .then((value) => list.addAll(value.docs))
+      .onError((error, stackTrace) => print(error));
+    userRanks = list.map((e) => e.data()).toList();
+    userRanks = userRanks.map((e){
+      return {
+        'name': e['name'],
+        'profit': e['profit'],
+      };
+    }).toList();
+    loading = false;
+    print(userRanks);
+    notifyListeners();
+  }
+
 
   defineUser() async {
     var result = {};
@@ -49,17 +70,16 @@ class StoreUser extends ChangeNotifier {
       sumList.clear();
       sumList.addAll(sum);
     }
+    loading = false;
     notifyListeners();
   }
 
   updateBalance(int number) async {
     balance = number;
     profit = double.parse(calculateRate(balance, INITBALANCE).toStringAsFixed(2));
-   await firestore.collection('users').doc(auth.currentUser!.email).update({
-     'balance': number,
-     'profit' : profit,
-   }).then((value) => print('update balance'))
-    .onError((error, stackTrace) => print('error occurs'));
+    await firestore.collection('users').doc(auth.currentUser!.email).update({
+      'balance': number, 'profit' : profit,
+    }).then((value) => print('update balance')).onError((error, stackTrace) => print(stackTrace));
    defineUser();
    print('updated Balance: $balance');
    notifyListeners();

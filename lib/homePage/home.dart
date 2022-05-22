@@ -1,4 +1,4 @@
-import 'package:capstone1/providers/User.dart';
+import 'package:capstone1/providers/user.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,6 +7,7 @@ import 'package:shimmer/shimmer.dart';
 
 import 'analysis.dart';
 import 'holding.dart';
+import 'profit/calculate.dart';
 
 final auth = FirebaseAuth.instance;
 final firestore = FirebaseFirestore.instance;
@@ -114,7 +115,7 @@ class _BalanceBoxState extends State<BalanceBox> {
           Align(
             alignment: Alignment.centerRight,
             child: (context.watch<StoreUser>().balance >= 0 ? TextButton(
-              child: Text("${context.watch<StoreUser>().balance} 원",),
+              child: Text("${addComma(context.watch<StoreUser>().balance)} 원",),
               onPressed: (){},
               style: TextButton.styleFrom(
                   primary: Colors.black,
@@ -126,7 +127,7 @@ class _BalanceBoxState extends State<BalanceBox> {
                   child: Container(
                     width : MediaQuery.of(context).size.width * 0.3, height: 25,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
+                      borderRadius: BorderRadius.circular(13),
                       color: Colors.white,
                     ),
                   ),

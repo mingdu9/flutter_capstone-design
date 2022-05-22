@@ -5,7 +5,7 @@ import 'package:is_first_run/is_first_run.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'providers/User.dart';
+import 'providers/user.dart';
 import 'providers/stock.dart';
 import 'authPage/userPage.dart';
 import 'firebase_options.dart';
@@ -95,6 +95,7 @@ class _TabContainerState extends State<TabContainer> with TickerProviderStateMix
   void initState() {
     // TODO: implement initState
     super.initState();
+    context.read<StorePrice>().getNewTerm();
     tabController = TabController(length: 4, vsync: this);
     tabController.addListener(_handleTabSelection);
     tabController.index = int.parse(widget.tab);

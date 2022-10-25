@@ -126,7 +126,7 @@ class _StockState extends State<Stock> {
             Icons.arrow_back_ios,
             color: Colors.black,
           ),
-          onPressed: () => GoRouter.of(context).go('/mainTab/${widget.tab}'),
+          onPressed: () => GoRouter.of(context).pop(),
         ),
         actions: [
           IconButton(

@@ -146,7 +146,7 @@ class _LoginState extends State<Login> {
                                   bool result = false;
                                   result = await login(email, pw);
                                   if(result == true){
-                                    GoRouter.of(context).go('/mainTab/0');
+                                    GoRouter.of(context).replace('/mainTab/0');
                                     print(auth.currentUser);//for log
                                   }else{
                                     emailController.clear();
@@ -159,12 +159,12 @@ class _LoginState extends State<Login> {
                               },
                               child: Text('로그인', style: TextStyle(color: Colors.white),),
                               style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.transparent,
+                                  backgroundColor: Colors.transparent,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(18)
                                   ),
                                   splashFactory: NoSplash.splashFactory,
-                                  primary: Colors.transparent,
-                                  onPrimary: Colors.transparent,
                                   padding: EdgeInsets.all(15),
                                   textStyle: TextStyle(
                                       fontSize: 20,

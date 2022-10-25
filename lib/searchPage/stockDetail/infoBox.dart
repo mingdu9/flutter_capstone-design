@@ -110,10 +110,10 @@ class _NewsBoxState extends State<NewsBox> {
                 ),
                 IconButton(
                     onPressed: () => context.read<StorePrice>().updateNews(widget.ticker),
-                    icon: Icon(
-                      Icons.refresh_rounded,
-                      color: Colors.black,
-                    ))
+                    icon: context.watch<StorePrice>().newsLoad == true ?
+                    CircularProgressIndicator() : Icon(
+                        Icons.refresh_rounded, color: Colors.black,)
+                )
               ],
             ),
             Divider(

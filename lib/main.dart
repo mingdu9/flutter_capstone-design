@@ -1,10 +1,15 @@
+import 'dart:async';
+
+import 'package:after_layout/after_layout.dart';
 import 'package:capstone1/firstPages/firstTutorial.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:is_first_run/is_first_run.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'providers/user.dart';
 import 'providers/stock.dart';
 import 'authPage/userPage.dart';
@@ -21,6 +26,8 @@ final auth = FirebaseAuth.instance;
 void main() async {
   //firebase setting code
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIOverlays(
+      [SystemUiOverlay.bottom, SystemUiOverlay.top]);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -33,8 +40,9 @@ void main() async {
           ChangeNotifierProvider(create: (c) => StorePrice()),
         ],
         child: MaterialApp.router(
-            routeInformationParser: router.routeInformationParser,
-            routerDelegate: router.routerDelegate,
+          routerConfig: router,
+            // routeInformationParser: router.routeInformationParser,
+            // routerDelegate: router.routerDelegate,
           debugShowCheckedModeBanner: false,
         ),
       )
@@ -48,28 +56,50 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with AfterLayoutMixin<MyApp>{
 
-  bool? _isFirstRun;
+  // bool? _isFirstRun;
+  //
+  // void _checkFirstRun() async {
+  //   bool ifr = await IsFirstRun.isFirstRun();
+  //   setState(() {
+  //     _isFirstRun = ifr;
+  //   });
+  // }
+  //
+  // @override
+  // void initState() {
+  //   // TODO: implement initState
+  //   super.initState();
+  //   // _checkFirstRun();
+  // }
+  //
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //       body: _isFirstRun == false ? TabContainer(tab: '0',) : WelcomePage(),
+  //   );
+  // }
 
-  void _checkFirstRun() async {
-    bool ifr = await IsFirstRun.isFirstRun();
-    setState(() {
-      _isFirstRun = ifr;
-    });
+  Future checkFirstSeen() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool _seen = (prefs.getBool('seen') ?? false);
+
+    if (_seen) {
+      GoRouter.of(context).replace('/mainTab/0');
+    } else {
+      await prefs.setBool('seen', true);
+      GoRouter.of(context).replace('/welcome');
+    }
   }
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _checkFirstRun();
-  }
+  FutureOr<void> afterFirstLayout(BuildContext context) => checkFirstSeen();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: _isFirstRun == false ? TabContainer(tab: '0',) : WelcomePage(),
+      body: Container()
     );
   }
 }
@@ -105,10 +135,6 @@ class _TabContainerState extends State<TabContainer> with TickerProviderStateMix
   Widget build(BuildContext context) {
     if (auth.currentUser != null) {
       return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Colors.white,
-      //   title: Text('capstone', style: TextStyle(color: Colors.black),),
-      // ),
       body: SafeArea(
         child: TabBarView(
           controller: tabController,
@@ -120,34 +146,41 @@ class _TabContainerState extends State<TabContainer> with TickerProviderStateMix
           ],
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        elevation: 10,
-        child: TabBar(
-          indicatorColor: Colors.transparent,
-          controller: tabController,
-          tabs: [
-            Tab(
+      bottomNavigationBar: Theme(
+        data: ThemeData(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+        ),
+        child: BottomAppBar(
+          elevation: 10,
+          child: TabBar(
+            indicatorColor: Colors.transparent,
+            controller: tabController,
+            tabs: [
+              Tab(
                 icon: tabController.index == 0 ?
                 Icon(Icons.home, color: Color(0xffB484FF)) :
-                Icon(Icons.home_outlined, color: Colors.black)
-            ),
-            Tab(
-                icon:  tabController.index == 1 ?
-                Icon(Icons.search, color: Color(0xffB484FF)) :
-                Icon(Icons.search, color: Colors.black)
-            ),
-            Tab(
-                icon: tabController.index == 2 ?
-                Icon(Icons.star, color: Color(0xffB484FF)) :
-                Icon(Icons.star_outline, color: Colors.black)
-            ),
-            Tab(
-                icon: Icon(Icons.more_horiz,
-                  color: tabController.index == 3 ? Color(0xffB484FF) : Colors.black,)
-            ),
-          ],
+                Icon(Icons.home_outlined, color: Colors.black),
+
+              ),
+              Tab(
+                  icon:  tabController.index == 1 ?
+                  Icon(Icons.search, color: Color(0xffB484FF)) :
+                  Icon(Icons.search, color: Colors.black)
+              ),
+              Tab(
+                  icon: tabController.index == 2 ?
+                  Icon(Icons.star, color: Color(0xffB484FF)) :
+                  Icon(Icons.star_outline, color: Colors.black)
+              ),
+              Tab(
+                  icon: Icon(Icons.more_horiz,
+                    color: tabController.index == 3 ? Color(0xffB484FF) : Colors.black,)
+              ),
+            ],
+          ),
         ),
-      ),
+      )
     );
     } else {
       return Login();

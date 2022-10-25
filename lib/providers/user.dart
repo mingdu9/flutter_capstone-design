@@ -30,7 +30,6 @@ class StoreUser extends ChangeNotifier {
       };
     }).toList();
     loading = false;
-    print(userRanks);
     notifyListeners();
   }
 

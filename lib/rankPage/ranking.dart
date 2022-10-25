@@ -183,7 +183,7 @@ class _MyRankState extends State<MyRank> {
                     ),
                   ),
                   Expanded(
-                      child: Text('${auth.currentUser!.displayName ?? 'null'}',
+                      child: Text(auth.currentUser!.displayName ?? ' ',
                         textAlign: TextAlign.start,
                         style: TextStyle(fontSize: 18, letterSpacing: -1.2),
                       )),

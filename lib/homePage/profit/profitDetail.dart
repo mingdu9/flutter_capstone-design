@@ -42,14 +42,33 @@ class _ProfitDetailState extends State<ProfitDetail> {
     return sum;
   }
 
+  var testRate = 0.0;
+  var testPrice = 0;
+
   @override
   initState(){
     super.initState();
   }
 
+  getTest(summaries){
+    var closingSum = 0;
+    for(var element in summaries){
+      int price = element['closingPrice'];
+      closingSum += price;
+    }
+    print("$testRate $testPrice");
+    testRate = calculateRate(closingSum, INITBALANCE);
+    testPrice = closingSum - INITBALANCE;
+    if(testRate == -100 && testPrice == -INITBALANCE){
+      testRate = 0;
+      testPrice = 0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var summaries = context.watch<StoreUser>().sumList;
+    getTest(summaries);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -83,7 +102,7 @@ class _ProfitDetailState extends State<ProfitDetail> {
                         children: [
                           Text('실현손익', style: titleStyle,),
                           Divider(height: 23, thickness: 1,),
-                          Text('${context.watch<StoreUser>().profit}%', style: TextStyle(
+                          Text('${context.watch<StoreUser>().profit.toStringAsFixed(2)}%', style: TextStyle(
                               fontSize: 20,
                               color: (context.watch<StoreUser>().profit >= 0 ? (
                                 context.watch<StoreUser>().profit == 0 ? Colors.grey : Colors.redAccent
@@ -111,15 +130,18 @@ class _ProfitDetailState extends State<ProfitDetail> {
                           children: [
                             Text('평가손익', style: titleStyle,),
                             Divider(height: 23, thickness: 1,),
-                            Text('{rate}%', style: TextStyle(
+                            Text('${testRate.toStringAsFixed(2)}%', style: TextStyle(
                                 fontSize: 20,
-                                color: Colors.grey
+                                color: (testRate >= 0 ? (
+                                    testRate == 0 ? Colors.grey : Colors.redAccent
+                                ): Colors.blueAccent)
                             )),
-                            SizedBox(height: 5,),
-                            Text('{profit}원', style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.grey
-                            ),)
+                            SizedBox(height: 5),
+                            Text('${addComma(testPrice)}원', style: TextStyle(
+                              fontSize: 15,
+                              color: (testPrice >= 0 ? (
+                                  testPrice == 0 ? Colors.grey : Colors.redAccent): Colors.blueAccent),
+                            ),),
                           ],
                         ),
                       )
@@ -142,10 +164,10 @@ class _ProfitDetailState extends State<ProfitDetail> {
                   shrinkWrap: true,
                   primary: false,
                   padding: EdgeInsets.symmetric(horizontal: 8),
-                  itemCount: summaries.length,
+                  itemCount: (summaries.isEmpty ? 1 : summaries.length),
                   itemBuilder: (BuildContext context, int index) {
-                    final currentSummary = summaries.elementAt(index);
                     try{
+                      final currentSummary = summaries.elementAt(index);
                       String rate = calculateRate(currentSummary['closingPrice'], context.watch<StoreUser>().holdings[index]['average']).toStringAsFixed(2);
                       num profit = calculateProfit(currentSummary['closingPrice'], context.watch<StoreUser>().holdings[index]['average'], context.watch<StoreUser>().holdings[index]['count']);
                       return Column(
@@ -232,12 +254,12 @@ class _ProfitDetailState extends State<ProfitDetail> {
                       );
                     }catch(e){
                       return Center(
-                        child: Text(e.toString()),
+                        child: Text('없음', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black87),)
                       );
                     }
                   },
 
-                ),
+                )
               ],
             ),
           )

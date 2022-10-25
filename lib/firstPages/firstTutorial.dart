@@ -15,7 +15,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
   @override
   void initState(){
     super.initState();
-    _tabController = TabController(length: 3, initialIndex: 0,vsync: this);
+    _tabController = TabController(length: 5, initialIndex: 0,vsync: this);
   }
 
   @override
@@ -34,7 +34,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
               child: TabBarView(
                 controller: _tabController,
                 children: const [
-                  FirstTab(), SecondTab(), ThirdTab()
+                  FirstTab(), SecondTab(), ThirdTab(), FourthTab(), LastTab()
                 ],
               ),
             ),

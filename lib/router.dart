@@ -8,34 +8,43 @@ import 'package:go_router/go_router.dart';
 
 import 'main.dart';
 
-final router = GoRouter(routes: [
-  GoRoute(
-    path: '/',
-    builder: (context, state) => const MyApp(),
+CustomTransitionPage buildPageWithSlideTransition<T>({
+  required BuildContext context,
+  required GoRouterState state,
+  required Widget child,
+}){
+  return CustomTransitionPage<T>(
+    key: state.pageKey,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+        SlideTransition(
+            position: animation.drive(Tween<Offset>(
+                begin: const Offset(1.0, 0.0),
+                end: Offset.zero
+            ).chain(CurveTween(curve: Curves.easeInOut)),),
+          child: child,
+        )
+  );
+}
+
+final router = GoRouter(
     routes: [
-      GoRoute(
-          path: 'mainTab/:tab',
-          builder: (c, s) => TabContainer(tab: s.params['tab'],),
-          routes: [
-            GoRoute(
-                path: 'stockDetail/:ticker',
-                pageBuilder: (context, state) => CustomTransitionPage<void>(
-                    key: state.pageKey,
-                    child: Stock(tab: state.params['tab'],ticker: state.params['ticker']),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                        SlideTransition(
-                          position: animation.drive(Tween<Offset>(
-                            begin: const Offset(1.0, 0.0),
-                            end: Offset.zero,).chain(CurveTween(curve: Curves.easeInOut))
-                          ),
-                          child: child,
-                        )
-                )
-            )
-          ]
-      )
-    ]
-  ),
+  GoRoute(path: '/', builder: (context, state) => const MyApp(), routes: [
+    GoRoute(
+        path: 'mainTab/:tab',
+        builder: (c, s) => TabContainer(
+              tab: s.params['tab'],
+            ),
+        routes: [
+          GoRoute(
+              path: 'stockDetail/:ticker',
+              builder: (context, state) => Stock( tab: state.params['tab'], ticker: state.params['ticker']),
+              pageBuilder: (context, state) => buildPageWithSlideTransition(
+                context: context, state: state,
+                child: Stock( tab: state.params['tab'], ticker: state.params['ticker']))
+          ),
+        ])
+  ]),
   GoRoute(
     path: '/login',
     builder: (c, s) => const Login(),
@@ -49,25 +58,17 @@ final router = GoRouter(routes: [
     builder: (context, state) => const WelcomePage(),
   ),
   GoRoute(
-    path: '/stockTutorial/:prev',
-    pageBuilder: (context, state) =>  NoTransitionPage<void>(
-        key: state.pageKey,
-        child: StockTutorial(prev: state.params['prev'],),
-    )
-  ),
-  GoRoute(
-    path: '/profitDetail',
-    pageBuilder: (context, state) => CustomTransitionPage<void>(
-      key: state.pageKey,
-      child: const ProfitDetail(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-          SlideTransition(
-            position: animation.drive(Tween<Offset>(
-              begin: const Offset(1.0, 0.0),
-              end: Offset.zero,).chain(CurveTween(curve: Curves.easeInOutExpo))
+      path: '/stockTutorial/:prev',
+      pageBuilder: (context, state) => NoTransitionPage<void>(
+            key: state.pageKey,
+            child: StockTutorial(
+              prev: state.params['prev'],
             ),
-            child: child,
-          )
-    )
-  )
+          )),
+  GoRoute(
+      path: '/profitDetail',
+      pageBuilder: (context, state) => buildPageWithSlideTransition(
+          context: context, state: state,
+          child: const ProfitDetail())
+  ),
 ]);

@@ -133,9 +133,7 @@ class _SearchState extends State<Search> {
               ],
             ),
             Positioned(
-              top: 20,
-              left: 20,
-              right: 20,
+              top: 20, left: 20, right: 20,
               child: Column(
                 children: [
                   TextField(
@@ -145,8 +143,8 @@ class _SearchState extends State<Search> {
                         setState((){
                           isTyping = true;
                         });
-                        context.read<StorePrice>().searchByName(text);
-                      }else {
+                        context.read<StorePrice>().searchByName(text.toUpperCase());
+                      } else{
                         setState((){
                           isTyping = false;
                         });
@@ -256,7 +254,7 @@ class StockRank extends StatelessWidget {
                 primary: Colors.black
             ),
             onPressed: (){
-              GoRouter.of(context).go('/mainTab/1/stockDetail/${context.read<StorePrice>().stockList[count]['ticker']}');
+              GoRouter.of(context).push('/mainTab/1/stockDetail/${context.read<StorePrice>().stockList[count]['ticker']}');
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

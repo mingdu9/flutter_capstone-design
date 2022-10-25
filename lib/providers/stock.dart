@@ -16,6 +16,7 @@ class StorePrice extends ChangeNotifier{
   var newsList = [];
   var noticeList = [];
   bool load = true;
+  bool newsLoad = false;
 
   int index = 1;
   var term = {};
@@ -50,14 +51,15 @@ class StorePrice extends ChangeNotifier{
   }
 
   updateNews(String ticker) async {
+    newsLoad = true;
     var url = Uri.parse('$URL/news/$ticker');
     final response = await http.get(url);
     if(response.statusCode == 200){
       getNewsByTicker(ticker);
-      print(response.body);
     }else{
       print('error with : ${response.statusCode}');
     }
+    notifyListeners();
   }
 
   updateNotice(String ticker) async {

@@ -1,6 +1,7 @@
 
 double calculateRate(int closingPrice, var averagePrice){
-  double result = (closingPrice / averagePrice) * 100 - 100;
+  // double result = (closingPrice / averagePrice) * 100 - 100;
+  double result = (closingPrice - averagePrice) / averagePrice * 100;
   return result;
 }
 

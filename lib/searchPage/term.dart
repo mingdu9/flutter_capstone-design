@@ -1,6 +1,44 @@
 import 'package:capstone1/providers/stock.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
+
+
+Widget shimmerBox(Size size){
+  final shimmerBox = BoxDecoration(
+      borderRadius: BorderRadius.circular(13),
+      color: Colors.white
+  );
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Shimmer.fromColors(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 14, width: size.width * 0.2,
+              decoration: shimmerBox
+            ),
+            Padding(padding: EdgeInsets.all(3)),
+            Container(
+                height: 14, width: size.width * 0.4,
+                decoration: shimmerBox
+            ),
+          ],
+        ),
+        baseColor: Color(0xFFE0E0E0),
+        highlightColor: Color(0xFFF5F5F5),
+      ),
+      IconButton(
+          onPressed: (){ },
+          icon: Icon(Icons.arrow_forward_ios)
+      )
+    ],
+  );
+}
+
 
 class TermBox extends StatefulWidget {
   const TermBox({Key? key}) : super(key: key);
@@ -62,7 +100,9 @@ class _TermBoxState extends State<TermBox> {
             ],
           ),
           Divider(),
-          Row(
+          (context.watch<StorePrice>().term.isEmpty?
+          shimmerBox(MediaQuery.of(context).size)
+              : Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -103,7 +143,7 @@ class _TermBoxState extends State<TermBox> {
                                     text: TextSpan(
                                         text: context.watch<StorePrice>().term['ex'],
                                         style: TextStyle(
-                                            color: Colors.black, fontSize: 16
+                                            color: Colors.black, fontSize: 16, height: 1.5
                                         )
                                     ),
                                   ),
@@ -150,7 +190,7 @@ class _TermBoxState extends State<TermBox> {
                   icon: Icon(Icons.arrow_forward_ios)
               )
             ],
-          ),
+          )),
         ],
       ),
     );

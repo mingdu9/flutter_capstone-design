@@ -40,7 +40,7 @@ class _SearchState extends State<Search> {
   @override
   void initState() {
     // TODO: implement initState
-    context.read<StorePrice>().getStockRanking();
+    context.read<StockProvider>().getStockRanking();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       setState(() {
@@ -83,7 +83,7 @@ class _SearchState extends State<Search> {
                 Divider(),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: ((context.watch<StorePrice>().stockList.length != 10) ?
+                  child: ((context.watch<StockProvider>().stockRankList.length != 10) ?
                       ListView.builder(
                         physics: NeverScrollableScrollPhysics(),
                         scrollDirection: Axis.vertical,
@@ -91,6 +91,8 @@ class _SearchState extends State<Search> {
                         itemCount: 10,
                         itemBuilder: (context, index ){
                           return Shimmer.fromColors(
+                              baseColor: Color(0xFFE0E0E0),
+                              highlightColor: Color(0xFFF5F5F5),
                               child: Padding(
                                 padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
                                 child: Column(
@@ -114,9 +116,7 @@ class _SearchState extends State<Search> {
                                     Divider(thickness: 0.5, color: Colors.grey.withOpacity(0.5),)
                                   ],
                                 ),
-                              ),
-                              baseColor: Color(0xFFE0E0E0),
-                              highlightColor: Color(0xFFF5F5F5)
+                              )
                           );
                         },
                       )
@@ -143,12 +143,12 @@ class _SearchState extends State<Search> {
                         setState((){
                           isTyping = true;
                         });
-                        context.read<StorePrice>().searchByName(text.toUpperCase());
+                        context.read<StockProvider>().searchByName(text.toUpperCase());
                       } else{
                         setState((){
                           isTyping = false;
                         });
-                        context.read<StorePrice>().searchList.clear();
+                        context.read<StockProvider>().searchList.clear();
                       }
                     },
                     key: _searchKey,
@@ -171,7 +171,7 @@ class _SearchState extends State<Search> {
                           color: Colors.black, letterSpacing: 1.3,)
                     ),
                   ),
-                  isTyping == true && context.watch<StorePrice>().searchList.isNotEmpty ? Container(
+                  isTyping == true && context.watch<StockProvider>().searchList.isNotEmpty ? Container(
                     margin: EdgeInsets.symmetric(horizontal: 23),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
@@ -185,14 +185,14 @@ class _SearchState extends State<Search> {
                       physics: NeverScrollableScrollPhysics(),
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,
-                      itemCount: context.watch<StorePrice>().searchList.length,
+                      itemCount: context.watch<StockProvider>().searchList.length,
                       itemBuilder: (c, i){
                         return GestureDetector(
                           onTap: (){
                             if(!currentFocus.hasPrimaryFocus){
                               currentFocus.unfocus();
                             }
-                            GoRouter.of(context).push("/mainTab/1/stockDetail/${context.read<StorePrice>().searchList[i]['ticker']}");
+                            GoRouter.of(context).push("/stockDetail/${context.read<StockProvider>().searchList[i]['ticker']}");
                           },
                           child: Container(
                             padding: EdgeInsets.only(left: 13, bottom: 3, top: 3),
@@ -205,12 +205,12 @@ class _SearchState extends State<Search> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text('${context.watch<StorePrice>().searchList[i]['name']}', style: TextStyle(
+                                      Text('${context.watch<StockProvider>().searchList[i]['name']}', style: TextStyle(
                                           fontWeight: FontWeight.w400,
                                           letterSpacing: -1.2,
                                           fontSize: 17
                                       ),),
-                                      Text(addString(context.watch<StorePrice>().searchList[i]['index']), style: TextStyle(
+                                      Text(addString(context.watch<StockProvider>().searchList[i]['index']), style: TextStyle(
                                           letterSpacing: -1.2,
                                           color: Colors.grey
                                       ),
@@ -251,16 +251,16 @@ class StockRank extends StatelessWidget {
         children: [
           TextButton(
             style: TextButton.styleFrom(
-                primary: Colors.black
+                foregroundColor: Colors.black
             ),
             onPressed: (){
-              GoRouter.of(context).push('/mainTab/1/stockDetail/${context.read<StorePrice>().stockList[count]['ticker']}');
+              GoRouter.of(context).push('/stockDetail/${context.read<StockProvider>().stockRankList[count]['ticker']}');
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('${count+1}. ', style: textStyle,),
-                Text('${context.watch<StorePrice>().stockList[count]['name']}', style: textStyle,)
+                Text('${context.watch<StockProvider>().stockRankList[count]['name']}', style: textStyle,)
               ],
             ),
           ),

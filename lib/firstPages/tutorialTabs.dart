@@ -150,7 +150,6 @@ class FourthTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
-    var width = MediaQuery.of(context).size.width;
     return Container(
       color: Colors.white,
       padding: EdgeInsets.only(right: 18, left: 18, ),
@@ -223,14 +222,13 @@ class LastTab extends StatelessWidget {
               width: width * 0.45, height: width * 0.45,
               child: GestureDetector(
                 onTap: () {
-                  GoRouter.of(context).replace('/login');
+                  GoRouter.of(context).replace('/');
                 }, // Image tapped
                 child: Image.asset(
                   'images/main.png',
                   width: width * 0.2, height: width * 0.2,
                 ),
               )
-
             ),
           ]
         )

@@ -37,7 +37,7 @@ class _RankingState extends State<Ranking> {
         rankHeight = _getSize();
       });
     });
-    context.read<StoreUser>().getRank();
+    context.read<UserProvider>().getRank();
   }
 
   @override
@@ -80,6 +80,8 @@ class _RankingState extends State<Ranking> {
 
 Widget loadingMyRank(Size size) {
   return Shimmer.fromColors(
+    baseColor: Color(0xFFE0E0E0),
+    highlightColor: Color(0xFFF5F5F5),
     child: Padding(
       padding: const EdgeInsets.fromLTRB(15, 8, 15, 8),
       child: Row(
@@ -112,8 +114,6 @@ Widget loadingMyRank(Size size) {
                 style: TextStyle(fontSize: 22, letterSpacing: -1.2))
           ]),
     ),
-    baseColor: Color(0xFFE0E0E0),
-    highlightColor: Color(0xFFF5F5F5),
   );
 }
 
@@ -165,7 +165,7 @@ class _MyRankState extends State<MyRank> {
             thickness: 1.0,
             color: Colors.grey.withOpacity(0.5),
           ),
-          (context.watch<StoreUser>().loading == true ? loadingMyRank(MediaQuery.of(context).size) :
+          (context.watch<UserProvider>().loading == true ? loadingMyRank(MediaQuery.of(context).size) :
           Padding(
             padding: const EdgeInsets.fromLTRB(15, 8, 15, 8),
             child: Row(
@@ -175,7 +175,7 @@ class _MyRankState extends State<MyRank> {
                   Container(
                     margin: EdgeInsets.only(right: 5),
                     child: Text(
-                      '${findRank(context.watch<StoreUser>().userRanks, auth.currentUser!.displayName ?? ' ')}. ',
+                      '${findRank(context.watch<UserProvider>().userRanks, auth.currentUser!.displayName ?? ' ')}. ',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 23,
@@ -187,7 +187,7 @@ class _MyRankState extends State<MyRank> {
                         textAlign: TextAlign.start,
                         style: TextStyle(fontSize: 18, letterSpacing: -1.2),
                       )),
-                  Text('${context.watch<StoreUser>().profit} %',
+                  Text('${context.watch<UserProvider>().realizedProfit} %',
                       style: TextStyle(fontSize: 22, letterSpacing: -1.2))
                 ]),
           ))
@@ -233,8 +233,8 @@ class TopRank extends StatelessWidget {
               physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
-              itemCount: context.watch<StoreUser>().userRanks.length > 10 ? 10 :
-                context.watch<StoreUser>().userRanks.length,
+              itemCount: context.watch<UserProvider>().userRanks.length > 10 ? 10 :
+                context.watch<UserProvider>().userRanks.length,
               itemBuilder: (c, i) {
                 return Column(
                   children: [Rank(count: i), Divider(indent: 3,)],
@@ -265,10 +265,10 @@ class Rank extends StatelessWidget {
         ),
         Expanded(
             child: Text(
-          '${context.watch<StoreUser>().userRanks[count]['name']}',
+          '${context.watch<UserProvider>().userRanks[count]['name']}',
           style: TextStyle(fontSize: 18, letterSpacing: -1.2),
         )),
-        Text('${context.watch<StoreUser>().userRanks[count]['profit']}%', style: TextStyle(fontSize: 22, letterSpacing: -1.2))
+        Text('${context.watch<UserProvider>().userRanks[count]['realizedProfit']}%', style: TextStyle(fontSize: 22, letterSpacing: -1.2))
       ]),
     );
   }

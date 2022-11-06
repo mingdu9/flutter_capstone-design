@@ -29,9 +29,9 @@ class _ChartContainerState extends State<ChartContainer> {
   Widget build(BuildContext context) {
     var minY = 0.0;
     var maxY = 0.0;
-    List<FlSpot> list = setSpots(context.read<StorePrice>().priceList);
+    List<FlSpot> list = setSpots(context.read<StockProvider>().priceList);
     List<int> prices = [];
-    for (var price in context.watch<StorePrice>().priceList){
+    for (var price in context.watch<StockProvider>().priceList){
       prices.add(price['closingPrice']);
     }
     prices.sort();
@@ -43,7 +43,7 @@ class _ChartContainerState extends State<ChartContainer> {
       fontSize: 13,
     );
     return ChangeNotifierProvider(
-      create: (c) => StorePrice(),
+      create: (c) => StockProvider(),
       child: Container(
         height: MediaQuery.of(context).size.height * 0.4,
         decoration: BoxDecoration(
@@ -78,7 +78,7 @@ class _ChartContainerState extends State<ChartContainer> {
                         );
                         var price = e.y * 100;
                         return LineTooltipItem('${price.toInt()}\n'
-                            '${context.read<StorePrice>().priceList[e.x.toInt()]['date'].substring(5)}',
+                            '${context.read<StockProvider>().priceList[e.x.toInt()]['date'].substring(5)}',
                             textStyle);
                       }).toList();
                     }
@@ -99,7 +99,7 @@ class _ChartContainerState extends State<ChartContainer> {
                           getTitlesWidget: (double value, TitleMeta meta){
                             String text;
                             if(value % 10 == 0 && value != 0){
-                              text = context.watch<StorePrice>().priceList[value.toInt()]['date'].substring(5);
+                              text = context.watch<StockProvider>().priceList[value.toInt()]['date'].substring(5);
                             }else{
                               text = '';
                             }

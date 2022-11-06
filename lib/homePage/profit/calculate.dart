@@ -1,12 +1,12 @@
 
-double calculateRate(int closingPrice, var averagePrice){
+double calculateRate(totalProfit, totalBuyPrice){
   // double result = (closingPrice / averagePrice) * 100 - 100;
-  double result = (closingPrice - averagePrice) / averagePrice * 100;
+  double result = (totalProfit / totalBuyPrice) * 100;
   return result;
 }
 
-num calculateProfit(int closingPrice, var averagePrice, int count){
-  num result = (closingPrice - averagePrice) * count;
+num calculateProfit(sellPrice, buyPrice, int count){
+  num result = (sellPrice - buyPrice) * count;
   return result;
 }
 

@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "311739712375",
+    "project_id": "capstone-63854",
+    "storage_bucket": "capstone-63854.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:311739712375:android:cf2141eac8e3d326cdd772",
+        "android_client_info": {
+          "package_name": "com.capstone.capstone1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "311739712375-g75frq8q4hnhhqg4m34h4l7h0f598ni8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrLpLqtP4p5Fys8ibp8p-3cyQQskzkybg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "311739712375-g75frq8q4hnhhqg4m34h4l7h0f598ni8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "311739712375-gf3bqq76ecg9ujmqp6b951hoq4o02iur.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sch.capstone"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:311739712375:android:2c8173c75d136ac4cdd772",
+        "android_client_info": {
+          "package_name": "com.sch.capstone"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "311739712375-g75frq8q4hnhhqg4m34h4l7h0f598ni8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrLpLqtP4p5Fys8ibp8p-3cyQQskzkybg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "311739712375-g75frq8q4hnhhqg4m34h4l7h0f598ni8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "311739712375-gf3bqq76ecg9ujmqp6b951hoq4o02iur.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sch.capstone"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

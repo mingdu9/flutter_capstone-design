@@ -32,6 +32,16 @@ class DefaultFirebaseOptions {
           'DefaultFirebaseOptions have not been configured for macos - '
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
+      case TargetPlatform.windows:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for windows - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
+      case TargetPlatform.linux:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for linux - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       default:
         throw UnsupportedError(
           'DefaultFirebaseOptions are not supported for this platform.',
@@ -40,20 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBWGA06UvN0HQkMpAopNg8K20RQwmzJkKA',
-    appId: '1:421680960621:android:877db939f8b81ff544db64',
-    messagingSenderId: '421680960621',
-    projectId: 'capstone-f748a',
-    storageBucket: 'capstone-f748a.appspot.com',
+    apiKey: 'AIzaSyDrLpLqtP4p5Fys8ibp8p-3cyQQskzkybg',
+    appId: '1:311739712375:android:cf2141eac8e3d326cdd772',
+    messagingSenderId: '311739712375',
+    projectId: 'capstone-63854',
+    storageBucket: 'capstone-63854.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyC9zuns8lNmKkXuR28Oq-UULILb7RUwnqg',
-    appId: '1:421680960621:ios:9dd7b493295ac0ff44db64',
-    messagingSenderId: '421680960621',
-    projectId: 'capstone-f748a',
-    storageBucket: 'capstone-f748a.appspot.com',
-    iosClientId: '421680960621-b02p5vt5t370ja1epcpo5mrk5nvt14pj.apps.googleusercontent.com',
+    apiKey: 'AIzaSyAP32uMVUKVxMVcC9m0GUanK7tjnOPDodE',
+    appId: '1:311739712375:ios:d12c28bba0ffb13acdd772',
+    messagingSenderId: '311739712375',
+    projectId: 'capstone-63854',
+    storageBucket: 'capstone-63854.appspot.com',
+    iosClientId: '311739712375-t9roc5h09uhtpfqdq2mh9nsaevjvhf3o.apps.googleusercontent.com',
     iosBundleId: 'com.capstone.capstone1',
   );
 }

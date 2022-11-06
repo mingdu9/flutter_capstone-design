@@ -1,3 +1,4 @@
+import 'package:capstone1/providers/infomation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:capstone1/providers/stock.dart';
@@ -13,6 +14,8 @@ openBrowser(String url) async {
 }
 
 var shimmerWidget = Shimmer.fromColors(
+    baseColor: Color(0xFFE0E0E0),
+    highlightColor: Color(0xFFF5F5F5),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -55,9 +58,7 @@ var shimmerWidget = Shimmer.fromColors(
             )
         )
       ],
-    ),
-    baseColor: Color(0xFFE0E0E0),
-    highlightColor: Color(0xFFF5F5F5)
+    )
 );
 
 class NewsBox extends StatefulWidget {
@@ -69,11 +70,24 @@ class NewsBox extends StatefulWidget {
 }
 
 class _NewsBoxState extends State<NewsBox> {
+  bool load = false;
+
+  setloadtrue(){
+    setState(() {
+      load = true;
+    });
+  }
+
+  setloadfalse(){
+    setState(() {
+      load = false;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    context.read<StorePrice>().getNewsByTicker(widget.ticker);
+    context.read<InfoProvider>().getNewsByTicker(widget.ticker);
   }
 
   @override
@@ -109,9 +123,8 @@ class _NewsBoxState extends State<NewsBox> {
                   ),
                 ),
                 IconButton(
-                    onPressed: () => context.read<StorePrice>().updateNews(widget.ticker),
-                    icon: context.watch<StorePrice>().newsLoad == true ?
-                    CircularProgressIndicator() : Icon(
+                    onPressed: ()=>context.read<InfoProvider>().updateNews(widget.ticker),
+                    icon: Icon(
                         Icons.refresh_rounded, color: Colors.black,)
                 )
               ],
@@ -120,11 +133,11 @@ class _NewsBoxState extends State<NewsBox> {
               thickness: 0.8,
               color: Colors.grey.withOpacity(0.8),
             ),
-            context.watch<StorePrice>().newsList.isNotEmpty ? ListView.builder(
+            context.watch<InfoProvider>().newsList.isNotEmpty ? ListView.builder(
               physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
-              itemCount: 3,
+              itemCount: context.watch<InfoProvider>().newsList.length > 3 ? 3 : context.watch<InfoProvider>().newsList.length,
               itemBuilder: (c, i) {
                 return News(
                   index: i,
@@ -150,7 +163,7 @@ class _NewsState extends State<News> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => openBrowser(context.read<StorePrice>().newsList[widget.index]['link']),
+      onTap: () => openBrowser(context.read<InfoProvider>().newsList[widget.index]['link']),
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 8.0),
         child: Column(
@@ -166,7 +179,7 @@ class _NewsState extends State<News> {
                     children: [
                       Text(
                         context
-                            .watch<StorePrice>()
+                            .watch<InfoProvider>()
                             .newsList[widget.index]['title']
                             .replaceAll('', '\u{200B}'),
                         maxLines: 1,
@@ -178,7 +191,7 @@ class _NewsState extends State<News> {
                         height: 5,
                       ),
                       Text(
-                        context.watch<StorePrice>().newsList[widget.index]
+                        context.watch<InfoProvider>().newsList[widget.index]
                         ['date'],
                         style: TextStyle(
                           fontSize: 13,
@@ -192,7 +205,7 @@ class _NewsState extends State<News> {
                 Flexible(
                     flex: 4,
                     child: Text(
-                      context.watch<StorePrice>().newsList[widget.index]
+                      context.watch<InfoProvider>().newsList[widget.index]
                       ['source'],
                       style: TextStyle(fontSize: 15, letterSpacing: -0.8),
                     ))
@@ -221,7 +234,7 @@ class _NoticeBoxState extends State<NoticeBox> {
   @override
   void initState() {
     super.initState();
-    context.read<StorePrice>().getNoticeByTicker(widget.ticker);
+    context.read<InfoProvider>().getNoticeByTicker(widget.ticker);
   }
 
   @override
@@ -258,23 +271,27 @@ class _NoticeBoxState extends State<NoticeBox> {
                 ),
                 IconButton(
                     onPressed: () => context
-                        .read<StorePrice>()
+                        .read<InfoProvider>()
                         .updateNotice(widget.ticker),
                     icon: Icon(
                       Icons.refresh_rounded,
                       color: Colors.black,
-                    ))
+                    ),
+                  style: IconButton.styleFrom(
+
+                  ),
+                ),
               ],
             ),
             Divider(
               thickness: 0.8,
               color: Colors.grey.withOpacity(0.8),
             ),
-            context.watch<StorePrice>().noticeList.isNotEmpty ? ListView.builder(
+            context.watch<InfoProvider>().noticeList.isNotEmpty ? ListView.builder(
               physics: AlwaysScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
-              itemCount: 3,
+              itemCount: context.watch<InfoProvider>().noticeList.length > 3 ? 3 : context.watch<InfoProvider>().noticeList.length,
               itemBuilder: (c, i) {
                 return Notice(
                   index: i,
@@ -300,7 +317,7 @@ class _NoticeState extends State<Notice> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => openBrowser(context.read<StorePrice>().noticeList[widget.index]['link']),
+      onTap: () => openBrowser(context.read<InfoProvider>().noticeList[widget.index]['link']),
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 8.0),
         child: Column(
@@ -316,7 +333,7 @@ class _NoticeState extends State<Notice> {
                     children: [
                       Text(
                         context
-                            .watch<StorePrice>()
+                            .watch<InfoProvider>()
                             .noticeList[widget.index]['title']
                             .replaceAll('', '\u{200B}'),
                         maxLines: 1,
@@ -328,7 +345,7 @@ class _NoticeState extends State<Notice> {
                         height: 5,
                       ),
                       Text(
-                        context.watch<StorePrice>().noticeList[widget.index]
+                        context.watch<InfoProvider>().noticeList[widget.index]
                         ['date'],
                         style: TextStyle(
                           fontSize: 13,
@@ -342,7 +359,7 @@ class _NoticeState extends State<Notice> {
                 Flexible(
                     flex: 4,
                     child: Text(
-                      context.watch<StorePrice>().noticeList[widget.index]
+                      context.watch<InfoProvider>().noticeList[widget.index]
                       ['source'],
                       style: TextStyle(fontSize: 15, letterSpacing: -0.8),
                     ))

@@ -1,10 +1,11 @@
+import 'package:capstone1/constant/globalKeys.dart';
 import 'package:capstone1/homePage/profit/calculate.dart';
 import 'package:capstone1/providers/user.dart';
 import 'package:capstone1/providers/stock.dart';
 import 'package:capstone1/searchPage/stockDetail/infoBox.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'lineChart.dart';
@@ -21,7 +22,6 @@ class Stock extends StatefulWidget {
 class _StockState extends State<Stock> {
   int selltotal = 0;
   int buytotal = 0;
-  int index = 0;
   final _scrollController = ScrollController();
   final TextEditingController sellController = TextEditingController();
   final TextEditingController buyController = TextEditingController();
@@ -29,7 +29,7 @@ class _StockState extends State<Stock> {
 
   _setTitle(){
     setState((){
-      title = context.read<StorePrice>().stockInfo['name'];
+      title = context.read<StockProvider>().stockInfo['name'];
     });
   }
   _initTitle(){
@@ -38,28 +38,9 @@ class _StockState extends State<Stock> {
     });
   }
 
-  findHoldingNum(List<dynamic> holdings, ticker) {
-    print('holdings: $holdings');
-    setState(() {
-      if (holdings.isNotEmpty) {
-        for (int i = 0; i <= holdings.length - 1; i++) {
-          if (holdings[i]['ticker'] == ticker) {
-            index = i;
-            return;
-          }
-        }
-        index = -1;
-      } else {
-        index = -1;
-      }
-      print('index: $index');
-    });
-  }
-
   getData() async {
-    await context.read<StorePrice>().setPriceList(widget.ticker);
-    await context.read<StoreUser>().defineUser();
-    print('index: $index');
+    await context.read<StockProvider>().setPriceList(widget.ticker);
+    await context.read<UserProvider>().defineUser();
   }
 
   @override
@@ -85,37 +66,30 @@ class _StockState extends State<Stock> {
     return result.substring(0, result.length - 1);
   }
 
-  sell(int count) async {
-    int price = context.read<StorePrice>().lastPrice['price'];
-    int balance = context.read<StoreUser>().balance;
-    await context.read<StoreUser>().updateBalance(balance + price * count);
-    await context.read<StoreUser>().updateCount(
-        -count,
-        index,
-        price,
-        widget.ticker);
+  sell(int count, BuildContext context) async {
+    context.read<UserProvider>().getTickerInfo(widget.ticker);
+    int price = context.read<StockProvider>().lastPrice['price'];
+    int balance = context.read<UserProvider>().balance;
+    String formatDate = DateFormat('yy.MM.dd').format(DateTime.now());
+
+    await context.read<UserProvider>().updateBalance(balance + price * count);
+    await context.read<UserProvider>()
+        .addHoldings(widget.ticker, 'sell', formatDate, price, count);
   }
 
-  buy(int count) async {
-    int price = context.read<StorePrice>().lastPrice['price'];
-    int balance = context.read<StoreUser>().balance;
-    int sum = count * price;
-    await context.read<StoreUser>().updateBalance(balance - sum);
-    if (index < 0) {
-      await context.read<StoreUser>().addHolding(price, count, widget.ticker);
-      index++;
-    } else {
-      await context.read<StoreUser>().updateCount(
-          count,
-          index,
-          price,
-          widget.ticker);
-    }
+  buy(int count, BuildContext context) async {
+    await context.read<UserProvider>().getTickerInfo(widget.ticker);
+    int price = context.read<StockProvider>().lastPrice['price'];
+    int balance = context.read<UserProvider>().balance;
+    String formatDate = DateFormat('yy.MM.dd-HH:mm:ss').format(DateTime.now());
+
+    await context.read<UserProvider>().updateBalance(balance - price * count);
+    await myGlobals.scaffoldKey.currentContext!.read<UserProvider>()
+        .addHoldings(widget.ticker, 'buy', formatDate, price, count);
   }
 
   @override
   Widget build(BuildContext context) {
-    findHoldingNum(context.read<StoreUser>().holdings, widget.ticker);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -157,6 +131,7 @@ class _StockState extends State<Stock> {
                   buyController.clear();
                   showDialog(
                       context: context,
+                      // context: myGlobals.scaffoldKey.currentContext!,
                       builder: (context) {
                         return Dialog(
                           shape: RoundedRectangleBorder(
@@ -201,7 +176,7 @@ class _StockState extends State<Stock> {
                                                         FontWeight.bold),
                                               ),
                                               Text(
-                                                '${addComma(context.watch<StorePrice>().lastPrice['price'])}원',
+                                                '${addComma(context.watch<StockProvider>().lastPrice['price'])}원',
                                                 style: TextStyle(
                                                   fontSize: 20,
                                                 ),
@@ -220,7 +195,7 @@ class _StockState extends State<Stock> {
                                                         FontWeight.bold),
                                               ),
                                               Text(
-                                                '${addComma(context.watch<StoreUser>().balance)}원',
+                                                '${addComma(context.watch<UserProvider>().balance)}원',
                                                 style: TextStyle(
                                                   fontSize: 20,
                                                 ),
@@ -242,10 +217,7 @@ class _StockState extends State<Stock> {
                                               Container(
                                                 padding:
                                                     EdgeInsets.only(bottom: 4),
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.3,
+                                                width: MediaQuery.of(context).size.width * 0.3,
                                                 child: TextField(
                                                   controller: buyController,
                                                   onChanged: (value) {
@@ -256,7 +228,7 @@ class _StockState extends State<Stock> {
                                                     } else {
                                                       setState(() {
                                                         buytotal = context
-                                                                    .read<StorePrice>()
+                                                                    .read<StockProvider>()
                                                                     .lastPrice['price'] * int.parse(value);
                                                       });
                                                     }
@@ -300,13 +272,8 @@ class _StockState extends State<Stock> {
                                         Container(
                                           margin: EdgeInsets.only(right: 8),
                                           child: ElevatedButton(
-                                            child: Text(
-                                              '매수',
-                                              style: TextStyle(
-                                                  color: Color(0xffff7d7d)),
-                                            ),
                                             style: ElevatedButton.styleFrom(
-                                              textStyle:
+                                              foregroundColor: Color(0xffff7d7d), backgroundColor: Colors.white, textStyle:
                                                   TextStyle(fontSize: 18),
                                               shape: RoundedRectangleBorder(
                                                   borderRadius:
@@ -314,46 +281,44 @@ class _StockState extends State<Stock> {
                                                   side: BorderSide(
                                                       color: Color(0xffff7d7d),
                                                       width: 2)),
-                                              onPrimary: Color(0xffff7d7d),
-                                              primary: Colors.white,
                                             ),
                                             onPressed: () {
                                               if (int.parse(buyController.text)
-                                                        * context.read<StorePrice>().lastPrice['price'] <=
-                                                  context.read<StoreUser>().balance) {
-                                                buy(int.parse(buyController.text));
-                                                findHoldingNum(context.read<StoreUser>().holdings, widget.ticker);
+                                                        * context.read<StockProvider>().lastPrice['price'] <=
+                                                  context.read<UserProvider>().balance) {
+                                                buy(int.parse(buyController.text), context);
                                                 Navigator.pop(context);
                                               } else {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                        const SnackBar(
-                                                            content:
-                                                                Text('매수 실패')));
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                        const SnackBar(content: Text('매수 실패'))
+                                                );
                                               }
                                             },
+                                            child: Text(
+                                              '매수',
+                                              style: TextStyle(
+                                                  color: Color(0xffff7d7d)),
+                                            ),
                                           ),
                                         ),
                                         ElevatedButton(
-                                          child: Text(
-                                            '취소',
-                                            style: TextStyle(
-                                                color: Color(0xff7f7f7f)),
-                                          ),
                                           style: ElevatedButton.styleFrom(
-                                            textStyle: TextStyle(fontSize: 18),
+                                            foregroundColor: Color(0xff7f7f7f), backgroundColor: Colors.white, textStyle: TextStyle(fontSize: 18),
                                             shape: RoundedRectangleBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(13),
                                                 side: BorderSide(
                                                     color: Color(0xff7f7f7f),
                                                     width: 2)),
-                                            onPrimary: Color(0xff7f7f7f),
-                                            primary: Colors.white,
                                           ),
                                           onPressed: () {
                                             Navigator.pop(context);
                                           },
+                                          child: Text(
+                                            '취소',
+                                            style: TextStyle(
+                                                color: Color(0xff7f7f7f)),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -365,20 +330,19 @@ class _StockState extends State<Stock> {
                         );
                       });
                 },
+                style: ElevatedButton.styleFrom(
+                    elevation: 0, backgroundColor: const Color(0xffff7d7d),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 9, horizontal: 30),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(13),
+                    )),
                 child: Text(
                   '매수',
                   style: TextStyle(
                     fontSize: 20,
                   ),
                 ),
-                style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 9, horizontal: 30),
-                    primary: const Color(0xffff7d7d),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13),
-                    )),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -387,6 +351,7 @@ class _StockState extends State<Stock> {
                   });
                   sellController.clear();
                   // GoRouter.of(context).
+                  context.read<UserProvider>().getTickerInfo(widget.ticker);
                   showDialog(
                       context: context,
                       builder: (context) {
@@ -436,7 +401,7 @@ class _StockState extends State<Stock> {
                                                           FontWeight.bold),
                                                 ),
                                                 Text(
-                                                  '${addComma(context.watch<StorePrice>().lastPrice['price'])}원',
+                                                  '${addComma(context.watch<StockProvider>().lastPrice['price'])}원',
                                                   style: TextStyle(
                                                     fontSize: 20,
                                                   ),
@@ -456,7 +421,7 @@ class _StockState extends State<Stock> {
                                                           FontWeight.bold),
                                                 ),
                                                 Text(
-                                                  '${context.watch<StoreUser>().holdings.isEmpty ? '0' : context.watch<StoreUser>().holdings[index]['count']}주',
+                                                  '${context.watch<UserProvider>().holdingInfo['totalCount']??0}주',
                                                   style: TextStyle(
                                                     fontSize: 20,
                                                   ),
@@ -479,10 +444,7 @@ class _StockState extends State<Stock> {
                                                 Container(
                                                   padding: EdgeInsets.only(
                                                       bottom: 4),
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.3,
+                                                  width: MediaQuery.of(context).size.width * 0.3,
                                                   child: TextField(
                                                     controller: sellController,
                                                     onChanged: (text) {
@@ -492,12 +454,7 @@ class _StockState extends State<Stock> {
                                                         });
                                                       } else {
                                                         setState(() {
-                                                          selltotal = context
-                                                                      .read<
-                                                                          StorePrice>()
-                                                                      .lastPrice[
-                                                                  'price'] *
-                                                              int.parse(text);
+                                                          selltotal = context.read<StockProvider>().lastPrice['price'] * int.parse(text);
                                                         });
                                                       }
                                                     },
@@ -542,13 +499,8 @@ class _StockState extends State<Stock> {
                                           Container(
                                             margin: EdgeInsets.only(right: 8),
                                             child: ElevatedButton(
-                                              child: Text(
-                                                '매도',
-                                                style: TextStyle(
-                                                    color: Color(0xff2892ff)),
-                                              ),
                                               style: ElevatedButton.styleFrom(
-                                                textStyle:
+                                                foregroundColor: Color(0xff2892ff), backgroundColor: Colors.white, textStyle:
                                                     TextStyle(fontSize: 18),
                                                 shape: RoundedRectangleBorder(
                                                     borderRadius:
@@ -558,34 +510,30 @@ class _StockState extends State<Stock> {
                                                         color:
                                                             Color(0xff2892ff),
                                                         width: 2)),
-                                                onPrimary: Color(0xff2892ff),
-                                                primary: Colors.white,
                                               ),
                                               onPressed: () {
-                                                if (index < 0) {
+                                                if (context.read<UserProvider>().holdingInfo['totalCount']! < 0 ||
+                                                    context.read<UserProvider>().holdingInfo['totalCount']! < int.parse(sellController.text)
+                                                ) {
                                                   ScaffoldMessenger.of(context).showSnackBar(
                                                           const SnackBar(content: Text('매도 실패')));
-                                                } else if (int.parse(sellController.text) >=
-                                                        context.read<StoreUser>().holdings[index]['count'] ||
-                                                    int.parse(sellController.text) <= 30) {
-                                                  sell(int.parse(sellController.text));
-                                                  Navigator.pop(context);
-                                                } else {
-                                                  print(context.read<StoreUser>().holdings[index]['count']);
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                          const SnackBar(content: Text('매도 실패')));
+                                                } else if (int.parse(sellController.text) <= 30) {
+                                                  sell(int.parse(sellController.text), context);
+                                                  Navigator.of(myGlobals.scaffoldKey.currentContext ?? context).pop();
+                                                } else if(context.read<UserProvider>().holdingInfo['totalCount'] == null){
+                                                  print('매도 null');
                                                 }
                                               },
+                                              child: Text(
+                                                '매도',
+                                                style: TextStyle(
+                                                    color: Color(0xff2892ff)),
+                                              ),
                                             ),
                                           ),
                                           ElevatedButton(
-                                            child: Text(
-                                              '취소',
-                                              style: TextStyle(
-                                                  color: Color(0xff7f7f7f)),
-                                            ),
                                             style: ElevatedButton.styleFrom(
-                                              textStyle:
+                                              foregroundColor: Color(0xff7f7f7f), backgroundColor: Colors.white, textStyle:
                                                   TextStyle(fontSize: 18),
                                               shape: RoundedRectangleBorder(
                                                   borderRadius:
@@ -593,12 +541,15 @@ class _StockState extends State<Stock> {
                                                   side: BorderSide(
                                                       color: Color(0xff7f7f7f),
                                                       width: 2)),
-                                              onPrimary: Color(0xff7f7f7f),
-                                              primary: Colors.white,
                                             ),
                                             onPressed: () {
                                               Navigator.pop(context);
                                             },
+                                            child: Text(
+                                              '취소',
+                                              style: TextStyle(
+                                                  color: Color(0xff7f7f7f)),
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -611,18 +562,18 @@ class _StockState extends State<Stock> {
                         );
                       });
                 },
-                child: Text(
-                  '매도',
-                  style: TextStyle(
-                    fontSize: 20,
-                  ),
-                ),
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   padding:
                       const EdgeInsets.symmetric(vertical: 9, horizontal: 30),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(13),
+                  ),
+                ),
+                child: Text(
+                  '매도',
+                  style: TextStyle(
+                    fontSize: 20,
                   ),
                 ),
               ),
@@ -633,7 +584,7 @@ class _StockState extends State<Stock> {
       body: ListView(
               controller: _scrollController,
               children: [
-                ( context.watch<StorePrice>().load == true ?
+                ( context.watch<StockProvider>().loading == true ?
                   loadingWidget(MediaQuery.of(context).size.width) : Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Row(
@@ -644,12 +595,12 @@ class _StockState extends State<Stock> {
                         children: [
                           Text(
                             addString(
-                                context.watch<StorePrice>().stockInfo['index']),
+                                context.watch<StockProvider>().stockInfo['index']),
                             style:
                                 TextStyle(fontSize: 17, color: Colors.black26),
                           ),
                           Text(
-                            context.watch<StorePrice>().stockInfo['name'],
+                            context.watch<StockProvider>().stockInfo['name'],
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 29,
@@ -662,12 +613,12 @@ class _StockState extends State<Stock> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '${addComma(context.watch<StorePrice>().lastPrice['price'])}원',
+                            '${addComma(context.watch<StockProvider>().lastPrice['price'])}원',
                             style: TextStyle(
                                 fontSize: 25,
                                 fontWeight: FontWeight.values[5],
                                 color: context
-                                            .watch<StorePrice>()
+                                            .watch<StockProvider>()
                                             .lastPrice['changeRate'] >
                                         0
                                     ? Colors.red
@@ -676,14 +627,14 @@ class _StockState extends State<Stock> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: context
-                                        .watch<StorePrice>()
+                                        .watch<StockProvider>()
                                         .lastPrice['changeRate'] >
                                     0
                                 ? [
                                     Icon(Icons.arrow_drop_up_rounded,
                                         color: Colors.red),
                                     Text(
-                                      '${context.watch<StorePrice>().lastPrice['changeRate']} %',
+                                      '${context.watch<StockProvider>().lastPrice['changeRate']} %',
                                       style: TextStyle(
                                           fontSize: 15, color: Colors.red),
                                     )
@@ -694,7 +645,7 @@ class _StockState extends State<Stock> {
                                       color: Colors.blue,
                                     ),
                                     Text(
-                                      '${context.watch<StorePrice>().lastPrice['changeRate']} %',
+                                      '${context.watch<StockProvider>().lastPrice['changeRate']} %',
                                       style: TextStyle(
                                           fontSize: 15, color: Colors.blue),
                                     )
@@ -705,8 +656,10 @@ class _StockState extends State<Stock> {
                     ],
                   ),
                 )),
-                (context.watch<StorePrice>().load == true ?
+                (context.watch<StockProvider>().loading == true ?
                   Shimmer.fromColors(
+                      baseColor: Color(0xFFEEEEEE),
+                      highlightColor: Color(0xFFF5F5F5),
                       child: Container(
                         margin: EdgeInsets.only(top: 20, bottom: 20, left: 18, right: 18),
                         height: MediaQuery.of(context).size.height * 0.4, width: double.infinity,
@@ -714,9 +667,7 @@ class _StockState extends State<Stock> {
                           borderRadius: BorderRadius.circular(13),
                           color: Color(0xFFE0E0E0),
                         ),
-                      ),
-                      baseColor: Color(0xFFEEEEEE),
-                      highlightColor: Color(0xFFF5F5F5))
+                      ))
                     : Container(
                   margin:
                       EdgeInsets.only(top: 20, bottom: 20, left: 18, right: 18),
@@ -738,6 +689,8 @@ Widget loadingWidget(num width) {
     color: Colors.white
   );
   return Shimmer.fromColors(
+      baseColor: Color(0xFFE0E0E0),
+      highlightColor: Color(0xFFF5F5F5),
       child: Padding(
         padding:  EdgeInsets.all(10.0),
         child: Row( mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -773,7 +726,5 @@ Widget loadingWidget(num width) {
             )
           ],
         ),
-      ),
-      baseColor: Color(0xFFE0E0E0),
-      highlightColor: Color(0xFFF5F5F5));
+      ));
 }

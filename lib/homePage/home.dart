@@ -23,7 +23,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   getData()async{
-    await context.read<StoreUser>().defineUser();
+    await context.read<UserProvider>().defineUser();
   }
 
   @override
@@ -48,17 +48,12 @@ class _HomeState extends State<Home> {
         padding: EdgeInsets.all(20),
         primary: false,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("안녕하세요 ,", style: titleStyle,),
-                    Text("${auth.currentUser!.displayName ?? 'null'} 님", style: titleStyle,)
-                  ]
-              ),
-            ],
+          Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("안녕하세요 ,", style: titleStyle,),
+                Text("${auth.currentUser!.displayName ?? 'null'} 님", style: titleStyle,)
+              ]
           ),
           BalanceBox(),
           ReturnBox(),
@@ -101,7 +96,7 @@ class _BalanceBoxState extends State<BalanceBox> {
           BoxShadow(
             color: Colors.grey.withOpacity(0.5),
             spreadRadius: 1,
-            blurRadius: 7,
+            blurRadius: 8,
             offset: const Offset(4,8),
           )
         ],
@@ -114,14 +109,15 @@ class _BalanceBoxState extends State<BalanceBox> {
           Divider(thickness: 1.0, color: Colors.grey.withOpacity(0.5), ),
           Align(
             alignment: Alignment.centerRight,
-            child: (context.watch<StoreUser>().balance >= 0 ? TextButton(
-              child: Text("${addComma(context.watch<StoreUser>().balance)} 원",),
+            child: (context.watch<UserProvider>().balance >= 0 ? TextButton(
               onPressed: (){},
               style: TextButton.styleFrom(
-                  primary: Colors.black,
-                  textStyle: textStyle
+                  foregroundColor: Colors.black, textStyle: textStyle
               ),
+              child: Text("${addComma(context.watch<UserProvider>().balance)} 원",),
             ) : Shimmer.fromColors(
+                baseColor: Color(0xFFE0E0E0),
+                highlightColor: Color(0xFFF5F5F5),
                 child: Padding(
                   padding: const EdgeInsets.all(13.6),
                   child: Container(
@@ -131,9 +127,7 @@ class _BalanceBoxState extends State<BalanceBox> {
                       color: Colors.white,
                     ),
                   ),
-                ),
-                baseColor: Color(0xFFE0E0E0),
-                highlightColor: Color(0xFFF5F5F5))
+                ))
             )
           )
         ],

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../providers/infomation.dart';
+
 
 Widget shimmerBox(Size size){
   final shimmerBox = BoxDecoration(
@@ -14,6 +16,8 @@ Widget shimmerBox(Size size){
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       Shimmer.fromColors(
+        baseColor: Color(0xFFE0E0E0),
+        highlightColor: Color(0xFFF5F5F5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -28,8 +32,6 @@ Widget shimmerBox(Size size){
             ),
           ],
         ),
-        baseColor: Color(0xFFE0E0E0),
-        highlightColor: Color(0xFFF5F5F5),
       ),
       IconButton(
           onPressed: (){ },
@@ -79,7 +81,6 @@ class _TermBoxState extends State<TermBox> {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       decoration: shadowedBox,
       margin: EdgeInsets.only(top: 20, bottom: 10),
@@ -93,104 +94,78 @@ class _TermBoxState extends State<TermBox> {
               Text('오늘의 용어', style: titleStyle,),
               IconButton(
                   onPressed: (){
-                    context.read<StorePrice>().getNewTerm();
+                    context.read<InfoProvider>().getNewTerm();
                     },
                   icon: Icon(Icons.refresh_rounded)
               )
             ],
           ),
           Divider(),
-          (context.watch<StorePrice>().term.isEmpty?
-          shimmerBox(MediaQuery.of(context).size)
-              : Row(
+          (context.watch<InfoProvider>().term.isEmpty?
+          shimmerBox(MediaQuery.of(context).size) :
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+                child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('[${context.watch<StorePrice>().term['topic']}]', style: TextStyle(
-                    color: Colors.grey
-                  ),),
-                  Text(removeDetail(context.watch<StorePrice>().term['term']), style: TextStyle(
-                    fontSize: 20, overflow: TextOverflow.fade
-                  ),),
-                ],
-              ),
-              IconButton(
-                  onPressed: (){
-                    showDialog(
-                        context: context,
-                        builder: (context){
-                          return Dialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                            child: Padding(
-                              padding: EdgeInsets.all(20),
-                              child: ListView(
-                                physics: AlwaysScrollableScrollPhysics(),
-                                scrollDirection: Axis.vertical,
-                                shrinkWrap: true,
-                                children: [
-                                  Text('[${context.watch<StorePrice>().term['topic']}]', style: TextStyle(
-                                      color: Colors.grey
-                                  ),),
-                                  Text(context.watch<StorePrice>().term['term'], style: TextStyle(
-                                      fontSize: 20, overflow: TextOverflow.fade, fontWeight: FontWeight.bold
-                                  ),),
-                                  Divider(thickness: 1.2, height: 20,),
-                                  RichText(
-                                    text: TextSpan(
-                                        text: context.watch<StorePrice>().term['ex'],
-                                        style: TextStyle(
-                                            color: Colors.black, fontSize: 16, height: 1.5
-                                        )
-                                    ),
-                                  ),
-                                  Divider(thickness: 1.2, height: 20,),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text('알고 있었나요?', style: TextStyle(fontSize: 18),),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          TextButton(
-                                              onPressed: (){
-                                                Navigator.pop(context);
-                                                print("Yes");
-                                                },
-                                              child: Text('네'),
-                                              style: TextButton.styleFrom(
-                                                  primary: Colors.black,
-                                                  padding: EdgeInsets.all(3)
-                                              ),
-                                          ),
-                                          TextButton(
-                                              onPressed: (){
-                                                print("NO");
-                                                Navigator.pop(context);
-                                                },
-                                              child: Text('아니요'),
-                                              style: TextButton.styleFrom(
-                                                primary: Colors.black,
-                                                padding: EdgeInsets.all(3)
-                                              ),
-                                          ),
-                                        ]
+            children:
+            [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('[${context.watch<InfoProvider>().term['topic']}]',
+                      style: TextStyle(
+                          color: Colors.grey
+                    ),),
+                    Text(removeDetail(context.watch<InfoProvider>().term['term']),
+                      style: TextStyle(
+                          fontSize: 20,
+                          overflow: TextOverflow.fade
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                    onPressed: (){
+                      showDialog(
+                          context: context,
+                          builder: (context){
+                            return Dialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                              child: Padding(
+                                padding: EdgeInsets.all(20),
+                                child: ListView(
+                                  physics: AlwaysScrollableScrollPhysics(),
+                                  scrollDirection: Axis.vertical,
+                                  shrinkWrap: true,
+                                  children: [
+                                    Text('[${context.watch<InfoProvider>().term['topic']}]', style: TextStyle(
+                                        color: Colors.grey
+                                    ),),
+                                    Text(context.watch<InfoProvider>().term['term'], style: TextStyle(
+                                        fontSize: 20, overflow: TextOverflow.fade, fontWeight: FontWeight.bold
+                                    ),),
+                                    Divider(thickness: 1.2, height: 20,),
+                                    RichText(
+                                      text: TextSpan(
+                                          text: context.watch<InfoProvider>().term['ex'],
+                                          style: TextStyle(
+                                              color: Colors.black, fontSize: 16, height: 1.5
+                                          )
                                       ),
-                                    ],
-                                  )
-                                ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
-                        });
-                  },
-                  icon: Icon(Icons.arrow_forward_ios)
-              )
+                            );
+                          });
+                    },
+                    icon: Icon(Icons.arrow_forward_ios)
+                )
             ],
-          )),
+          ),
+              )),
         ],
       ),
     );

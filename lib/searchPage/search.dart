@@ -80,7 +80,7 @@ class _SearchState extends State<Search> {
                       fontWeight: FontWeight.bold
                   )),
                 ),
-                Divider(),
+                Divider(color: Colors.grey,),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
                   child: ((context.watch<StockProvider>().stockRankList.length != 10) ?
@@ -168,7 +168,7 @@ class _SearchState extends State<Search> {
                         filled: true,
                         hintText: '종목 검색...',
                         hintStyle: TextStyle(
-                          color: Colors.black, letterSpacing: 1.3,)
+                          color: Colors.black, letterSpacing: -1.2,)
                     ),
                   ),
                   isTyping == true && context.watch<StockProvider>().searchList.isNotEmpty ? Container(

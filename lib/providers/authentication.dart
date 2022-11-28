@@ -34,22 +34,31 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> signup(email, pw, name) async{
     try {
-      UserCredential userCredential = await auth.createUserWithEmailAndPassword(
+        await auth.createUserWithEmailAndPassword(
           email: email,
           password: pw
-      );
-      if(userCredential.user != null) {
-        userCredential.user?.updateDisplayName(name);
-        users.doc(userCredential.user?.uid).set({
-          'name': name,
-          'balance': INITBALANCE,
-          'tickers': [],
-          'realizedProfit': 0,
-        }).then((_) => print('added'))
-            .catchError((e) => print('error: $e'));
-        userCredential.user?.sendEmailVerification();
-      }
-      return true;
+      ).then((UserCredential userCredential){
+          if(userCredential.user != null) {
+            userCredential.user?.updateDisplayName(name);
+            users.doc(userCredential.user?.uid).set({
+              'name': name,
+              'balance': INITBALANCE,
+              'tickers': [],
+              'realizedProfit': 0,
+            }).then((_) => print('added')).catchError((e) => print('error: $e'));
+            userCredential.user?.sendEmailVerification();
+          }
+      });
+        // auth.authStateChanges().listen((User? user) {
+        //   if(user != null){
+        //     auth.signOut();
+        //   }
+        // });
+        // if(auth.currentUser != null){
+        //   auth.signOut();
+        // }
+        await login(email, pw);
+        return true;
     } on FirebaseAuthException catch (e) {
       setLastFirebaseResponse(e.code);
       return false;
@@ -91,5 +100,12 @@ class AuthProvider extends ChangeNotifier {
   sendPasswordResetEmailByKor() async {
     await auth.setLanguageCode("ko");
     auth.sendPasswordResetEmail(email: getUser().email);
+  }
+
+  modifyName(String name) async {
+    await auth.currentUser!.updateDisplayName(name);
+    await firestore.collection('users').doc(auth.currentUser!.uid).update({
+      'name': name
+    });
   }
 }

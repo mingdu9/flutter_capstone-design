@@ -25,6 +25,12 @@ class _ChartContainerState extends State<ChartContainer> {
     return spots;
   }
 
+  final leftStyle = TextStyle(
+    color: Colors.black38,
+    fontWeight: FontWeight.bold,
+    fontSize: 13,
+  );
+
   @override
   Widget build(BuildContext context) {
     var minY = 0.0;
@@ -37,11 +43,7 @@ class _ChartContainerState extends State<ChartContainer> {
     prices.sort();
     minY = prices[0] * 0.01;
     maxY = prices[prices.length-1] *0.01;
-    const leftStyle = TextStyle(
-      color: Colors.black38,
-      fontWeight: FontWeight.bold,
-      fontSize: 13,
-    );
+
     return ChangeNotifierProvider(
       create: (c) => StockProvider(),
       child: Container(

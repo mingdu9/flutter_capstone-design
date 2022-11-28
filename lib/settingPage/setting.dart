@@ -30,8 +30,8 @@ class Setting extends StatelessWidget {
                 children: [
                   TextButton(
                     onPressed: (){
-                      context.read<AuthProvider>().logout();
                       GoRouter.of(context).go('/');
+                      context.read<AuthProvider>().logout();
                     },
                     style: TextButton.styleFrom(
                         foregroundColor: Colors.black, textStyle: TextStyle(
@@ -77,7 +77,7 @@ class Setting extends StatelessWidget {
                 children: [
                   TextButton(
                     onPressed: (){
-                      GoRouter.of(context).go('/welcome');
+                      GoRouter.of(context).go('/tutorial/start');
                     },
                     style: TextButton.styleFrom(
                         foregroundColor: Colors.black, textStyle: TextStyle(
@@ -86,7 +86,7 @@ class Setting extends StatelessWidget {
                         letterSpacing: -1.2
                     )
                     ),
-                    child: Text('첫 설명 다시보기'),
+                    child: Text('가이드 다시보기'),
                   ),
                   Divider(thickness: 0.6, color: Colors.grey.withOpacity(0.5), ),
                 ],
@@ -144,10 +144,8 @@ class Setting extends StatelessWidget {
                                     ),
                                     TextButton(
                                         onPressed: (){
-                                          GoRouter.of(context).replace('/');
-                                          print(auth.currentUser!.uid);
+                                          Navigator.pop(context);
                                           context.read<AuthProvider>().withdraw(auth.currentUser!.uid);
-                                          context.read<AuthProvider>().logout();
                                         },
                                         style: TextButton.styleFrom(
                                           splashFactory: NoSplash.splashFactory,

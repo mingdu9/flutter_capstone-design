@@ -1,11 +1,21 @@
+import 'package:capstone1/providers/stock.dart';
 import 'package:capstone1/providers/user.dart';
+import 'package:capstone1/searchPage/stockDetail/stockRoot.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 final auth = FirebaseAuth.instance;
+openBrowser(String url) async {
+  if(await canLaunchUrlString(url)){
+    launchUrlString(url, mode: LaunchMode.externalApplication);
+  }else{
+    print('can\'t open link');
+  }
+}
 
 class Ranking extends StatefulWidget {
   const Ranking({Key? key}) : super(key: key);
@@ -42,25 +52,43 @@ class _RankingState extends State<Ranking> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
+    return Stack( children: [
       ListView(
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
         children: <Widget>[
-          Container(
+          SizedBox(
             height: rankHeight,
           ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
-              child: Text(
-                'tips',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 30,
-                    letterSpacing: -1.5),
-              ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '많이 본 뉴스',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                        letterSpacing: -1.5),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => context
+                      .read<StockProvider>()
+                      .updateNewsList(),
+                  icon: Icon(
+                    Icons.refresh_rounded,
+                    color: Colors.black, size: 30,
+                  ),
+                  style: IconButton.styleFrom(
+
+                  ),
+                ),
+              ],
             ),
           ),
           TopCarousel(),
@@ -274,73 +302,97 @@ class Rank extends StatelessWidget {
   }
 }
 
-class TopCarousel extends StatelessWidget {
+class TopCarousel extends StatefulWidget {
   const TopCarousel({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final List<String> imgList = [
-      'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-      'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-      'https://images.unsplash.com/photo-1642543348745-03b1219733d9?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80'
-    ];
-    final List<String> stringList = [
-      '실패없이 투자하는 법',
-      '당신이 손해보는 열 가지 이유',
-      'PER? EPS? 알아야 할 주식 용어'
-    ];
+  State<TopCarousel> createState() => _TopCarouselState();
+}
 
-    final List<Widget> imageSliders = imgList.map((item) =>
-        Container(
-          child: Container(
-            margin: EdgeInsets.all(5.0),
-            child: ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(13.0)),
-                child: Stack(
-                  children: <Widget>[
-                    Image.network(
-                      item, fit: BoxFit.cover, width: 1000.0,
-                      loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress){
-                        if (loadingProgress == null) return child;
-                        return Shimmer.fromColors(
-                            child: Container(
-                              width: 1000, height: double.infinity,
+class _TopCarouselState extends State<TopCarousel> {
+  List<String> imgList = [];
+  List<String> titleList = [];
+  List<String> urlList = [];
+  List<Widget> imageSliders = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    getData();
+    super.initState();
+  }
+
+  getData() async {
+    await context.read<StockProvider>().getNewsList();
+    for(int i=0;i<5;i++){
+      setState(() {
+        imgList.add(context.read<StockProvider>().seenNewsList[i]['img']);
+        titleList.add(context.read<StockProvider>().seenNewsList[i]['title']);
+        urlList.add(context.read<StockProvider>().seenNewsList[i]['url']);
+      });
+    }
+    setState(() {
+      imageSliders = imgList.map((item) =>
+          Container(
+            child: Container(
+              margin: EdgeInsets.all(5.0),
+              child: GestureDetector(
+                onTap: (){
+                  openBrowser(urlList[imgList.indexOf(item)]);
+                },
+                child: ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(13.0)),
+                    child: Stack(
+                      children: <Widget>[
+                        Image.network(
+                          item, fit: BoxFit.cover, width: 1000.0,
+                          loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress){
+                            if (loadingProgress == null) return child;
+                            return Shimmer.fromColors(
+                                baseColor: Color(0xFFE0E0E0),
+                                highlightColor: Color(0xFFF5F5F5),
+                                child: Container(
+                                  width: 1000, height: double.infinity,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white, borderRadius: BorderRadius.circular(13)
+                                  ),
+                                ));
+                          },
+                        ),
+                        Positioned(
+                          bottom: 0.0,
+                          left: 0.0,
+                          right: 0.0,
+                          child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.white, borderRadius: BorderRadius.circular(13)
+                                gradient: LinearGradient(
+                                  colors: const [
+                                    Color.fromARGB(200, 0, 0, 0),
+                                    Color.fromARGB(0, 0, 0, 0)
+                                  ],
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                ),
                               ),
-                            ),
-                            baseColor: Color(0xFFE0E0E0),
-                            highlightColor: Color(0xFFF5F5F5));
-                      },
-                    ),
-                    Positioned(
-                      bottom: 0.0,
-                      left: 0.0,
-                      right: 0.0,
-                      child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: const [
-                                Color.fromARGB(200, 0, 0, 0),
-                                Color.fromARGB(0, 0, 0, 0)
-                              ],
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                            ),
-                          ),
-                          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                          child: Text(
-                            stringList[imgList.indexOf(item)],
-                            style: TextStyle(
-                                fontSize: 25,
-                                color: Colors.white,
-                                letterSpacing: -1.1),
-                          )),
-                    ),
-                  ],
-                )),
-          ),
-        )).toList();
+                              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                              child: Text(
+                                titleList[imgList.indexOf(item)],
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                    letterSpacing: -1.1),
+                              )),
+                        ),
+                      ],
+                    )),
+              ),
+            ),
+          )).toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       child: CarouselSlider(
         options: CarouselOptions(

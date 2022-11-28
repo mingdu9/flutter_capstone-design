@@ -18,16 +18,16 @@ import 'providers/stock.dart';
 import 'authPage/userPage.dart';
 import 'firebase_options.dart';
 
-import 'firstPages/firstPage.dart';
 import 'rankPage/ranking.dart';
 import 'homePage/home.dart';
 import 'router.dart';
 import 'searchPage/search.dart';
 
+// Firebase Authentication을 사용하기 위한 final 인스턴스
 final auth = FirebaseAuth.instance;
 
 void main() async {
-  //firebase setting code
+  //firebase 설정 코드
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual, overlays: [SystemUiOverlay.bottom, SystemUiOverlay.top]);
@@ -35,10 +35,10 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // router로는 GoRouter 패키지, 상태관리는 Provider 패키지
   runApp(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (c) => TabProvider()),
           ChangeNotifierProvider(create: (c) => UserProvider()),
           ChangeNotifierProvider(create: (c) => StockProvider()),
           ChangeNotifierProvider(create: (c) => AuthProvider()),
@@ -52,6 +52,7 @@ void main() async {
   );
 }
 
+// 최상위 계층 위젯
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -59,12 +60,13 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with AfterLayoutMixin<MyApp>{
+class _MyAppState extends State<MyApp> with AfterLayoutMixin<MyApp> {
 
+  // 첫 실행인지 확인
   Future checkFirstSeen() async {
+    // 기기 로컬 저장소를 사용하여 첫 실행 여부 저장
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool seen = (prefs.getBool('seen') ?? false);
-
     if (seen) {
       GoRouter.of(context).replace('/');
     } else {
@@ -73,27 +75,35 @@ class _MyAppState extends State<MyApp> with AfterLayoutMixin<MyApp>{
     }
   }
 
+  // 레이아웃이 그려진 후 첫 실행 확인
   @override
-  FutureOr<void> afterFirstLayout(BuildContext context) => checkFirstSeen();
+  FutureOr<void> afterFirstLayout(BuildContext context) {
+    checkFirstSeen();
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    if(auth.currentUser == null){
-      return Scaffold(
-          body: SafeArea(child: Login())
-      );
-    }else{
-      if(auth.currentUser!.emailVerified){
-        return TabContainer(tab: '0',);
-      }else{
-        return Scaffold(
-            body: SafeArea(child: Login())
-        );
-      }
-    }
+    return StreamBuilder<User?>(
+      // 로그인 되어있다면 홈화면 반환, 그렇지 않다면 로그인 화면 반환
+      stream: auth.authStateChanges(),
+      initialData: auth.currentUser,
+      builder: (context, shapshot){
+        if(!shapshot.hasData){
+          return Scaffold(
+            body: SafeArea(
+              child: Login(),
+            ),
+          );
+        }
+        return TabContainer(tab: 0,);
+      },
+    );
   }
 }
 
+
+// 홈 화면을 제어하는 하단 네비게이터 바
 class TabContainer extends StatefulWidget {
   const TabContainer({Key? key, this.tab}) : super(key: key);
   final tab;
@@ -118,14 +128,14 @@ class _TabContainerState extends State<TabContainer> with TickerProviderStateMix
     context.read<InfoProvider>().getNewTerm();
     tabController = TabController(length: 4, vsync: this);
     tabController.addListener(_handleTabSelection);
-    tabController.index = int.parse(widget.tab);
+    tabController.index = widget.tab;
   }
 
   @override
   Widget build(BuildContext context) {
     if (auth.currentUser != null) {
       return Scaffold(
-        key: myGlobals.scaffoldKey,
+        key: homeGlobals.scaffoldKey,
           body: SafeArea(
             child:
             TabBarView(
@@ -138,7 +148,7 @@ class _TabContainerState extends State<TabContainer> with TickerProviderStateMix
               ],
             ),
           ),
-          bottomNavigationBar: Theme( data: ThemeData(
+          bottomNavigationBar: Theme(data: ThemeData(
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
           ),

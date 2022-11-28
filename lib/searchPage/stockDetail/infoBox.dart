@@ -1,3 +1,4 @@
+import 'package:capstone1/constant/globalKeys.dart';
 import 'package:capstone1/providers/infomation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -114,12 +115,15 @@ class _NewsBoxState extends State<NewsBox> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '종목 뉴스',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -1.2,
-                    fontSize: 26,
+                Container(
+                  key: homeGlobals.newsKey,
+                  child: Text(
+                    '종목 뉴스',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -1.2,
+                      fontSize: 26,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -261,12 +265,15 @@ class _NoticeBoxState extends State<NoticeBox> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '공시 정보',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -1.2,
-                    fontSize: 26,
+                Container(
+                  key: homeGlobals.infoKey,
+                  child: Text(
+                    '공시 정보',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -1.2,
+                      fontSize: 26,
+                    ),
                   ),
                 ),
                 IconButton(

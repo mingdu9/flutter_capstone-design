@@ -104,7 +104,7 @@ class _HoldingReturnState extends State<HoldingReturn> with AfterLayoutMixin<Hol
   @override
   FutureOr<void> afterFirstLayout(BuildContext context) async {
     // TODO: implement afterFirstLayout
-    getData();
+      getData();
   }
 
   getData() async {
@@ -113,84 +113,80 @@ class _HoldingReturnState extends State<HoldingReturn> with AfterLayoutMixin<Hol
       await context.read<UserProvider>().getStockSummaryByTickers(
         context.read<UserProvider>().tickers
       );
-      await context.read<UserProvider>().calculateValuationProfitByTicker(
-          context.read<UserProvider>().tickers[widget.index]
-      );
+      if(mounted){
+        context.read<UserProvider>().calculateValuationProfitByTicker(
+            context.read<UserProvider>().tickers[widget.index]);
+      }
     });
 
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: (){
-
-      },
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Container(
-                  margin: EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('${context.read<UserProvider>().summaries.elementAt(widget.index)['name']}',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: -1.2,
-                            fontSize: 17),
-                      ),
-                      Text('${context.watch<UserProvider>().summaries.elementAt(widget.index)['index']}',
-                        style: TextStyle(
-                            letterSpacing: -1.2,
-                            color: Colors.grey),
-                      )
-                    ],
-                  ),
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('${context.read<UserProvider>().summaries.elementAt(widget.index)['name']}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: -1.2,
+                          fontSize: 17),
+                    ),
+                    Text('${context.watch<UserProvider>().summaries.elementAt(widget.index)['index']}',
+                      style: TextStyle(
+                          letterSpacing: -1.2,
+                          color: Colors.grey),
+                    )
+                  ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: context.watch<UserProvider>().valuationProfitRate > 0 ?
-                    [
-                      Icon(Icons.arrow_drop_up_rounded, color: Colors.redAccent),
-                      Text('${context.watch<UserProvider>().valuationProfitRate} %',
-                        style: TextStyle(
-                            fontSize: 23,
-                            color: Colors.redAccent),)
-                    ] : context.watch<UserProvider>().valuationProfitRate == 0 ? [
-                      Text('- ${context.watch<UserProvider>().valuationProfitRate} %',
-                        style: TextStyle(
-                            fontSize: 23,
-                            color: Colors.grey),)
-                    ]: [
-                      Icon(Icons.arrow_drop_down_rounded, color: Colors.blue,),
-                      Text('${context.watch<UserProvider>().valuationProfitRate} %',
-                        style: TextStyle(
-                            fontSize: 23,
-                            color: Colors.blue),)
-                    ]
-                  ),
-              Text('${addComma(context.watch<UserProvider>().valuationProfitRate.ceil())}원',
-                style: TextStyle(
-                    fontSize: 15,
-                    color: context.watch<UserProvider>().valuationProfitRate > 0
-                        ? Colors.redAccent
-                        : ( context.watch<UserProvider>().valuationProfitRate == 0 ? Colors.black54 : Colors.blueAccent)),
-                  ),                ]),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: context.watch<UserProvider>().valuationProfitRate > 0 ?
+                  [
+                    Icon(Icons.arrow_drop_up_rounded, color: Colors.redAccent),
+                    Text('${context.watch<UserProvider>().valuationProfitRate.toStringAsFixed(2)} %',
+                      style: TextStyle(
+                          fontSize: 23,
+                          color: Colors.redAccent),)
+                  ] : context.watch<UserProvider>().valuationProfitRate == 0 ? [
+                    Text('- ${context.watch<UserProvider>().valuationProfitRate.toStringAsFixed(2)} %',
+                      style: TextStyle(
+                          fontSize: 23,
+                          color: Colors.grey),)
+                  ]: [
+                    Icon(Icons.arrow_drop_down_rounded, color: Colors.blue,),
+                    Text('${context.watch<UserProvider>().valuationProfitRate.toStringAsFixed(2)} %',
+                      style: TextStyle(
+                          fontSize: 23,
+                          color: Colors.blue),)
+                  ]
+                ),
+            Text('${addComma(context.watch<UserProvider>().valuationProfit.ceil())}원',
+              style: TextStyle(
+                  fontSize: 15,
+                  color: context.watch<UserProvider>().valuationProfitRate > 0
+                      ? Colors.redAccent
+                      : ( context.watch<UserProvider>().valuationProfitRate == 0 ? Colors.black54 : Colors.blueAccent)),
+                ),                ]),
 
-            ]
-          ), Divider(
-            thickness: 0.5, color: Colors.grey.withOpacity(0.7),
-          )
-        ],
-      ),
+          ]
+        ), Divider(
+          thickness: 0.5, color: Colors.grey.withOpacity(0.7),
+        )
+      ],
     );
   }
 }

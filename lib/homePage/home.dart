@@ -1,5 +1,9 @@
+import 'dart:async';
+
+import 'package:after_layout/after_layout.dart';
 import 'package:capstone1/providers/user.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,7 +24,7 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with AfterLayoutMixin<Home> {
 
   getData()async{
     await context.read<UserProvider>().defineUser();
@@ -30,6 +34,11 @@ class _HomeState extends State<Home> {
   void initState() {
     // TODO: implement initState
     super.initState();
+  }
+
+  @override
+  FutureOr<void> afterFirstLayout(BuildContext context) {
+    // TODO: implement afterFirstLayout
     getData();
   }
 
@@ -52,7 +61,7 @@ class _HomeState extends State<Home> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text("안녕하세요 ,", style: titleStyle,),
-                Text("${auth.currentUser!.displayName ?? 'null'} 님", style: titleStyle,)
+                Text("${context.watch<UserProvider>().name} 님", style: titleStyle,)
               ]
           ),
           BalanceBox(),
@@ -61,6 +70,8 @@ class _HomeState extends State<Home> {
         ],
       );
     }
+
+
   }
 
 
@@ -76,7 +87,7 @@ class _BalanceBoxState extends State<BalanceBox> {
   @override
   Widget build(BuildContext context) {
     const titleStyle = TextStyle(
-        fontSize: 30,
+        fontSize: 27,
         fontWeight: FontWeight.bold,
         letterSpacing: -2.0,
         color: Colors.black
@@ -110,7 +121,9 @@ class _BalanceBoxState extends State<BalanceBox> {
           Align(
             alignment: Alignment.centerRight,
             child: (context.watch<UserProvider>().balance >= 0 ? TextButton(
-              onPressed: (){},
+              onPressed: (){
+                GoRouter.of(context).push('/history');
+              },
               style: TextButton.styleFrom(
                   foregroundColor: Colors.black, textStyle: textStyle
               ),

@@ -93,7 +93,7 @@ class _HoldingsBoxState extends State<HoldingsBox>{
     @override
     FutureOr<void> afterFirstLayout(BuildContext context) async {
       // TODO: implement afterFirstLayout
-      if(mounted) await getData(myGlobals.scaffoldKey.currentContext!);
+      if(mounted) await getData(homeGlobals.scaffoldKey.currentContext!);
   }
 
     getData(BuildContext mainContext) async {
@@ -171,8 +171,7 @@ class _HoldingsBoxState extends State<HoldingsBox>{
                 )
               ],
             ),
-            Divider(thickness: 0.5, color: Colors.grey
-                .withOpacity(0.7),)
+            Divider(thickness: 0.5, color: Colors.grey.withOpacity(0.7),)
           ],
         ),
       );

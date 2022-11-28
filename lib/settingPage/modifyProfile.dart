@@ -103,7 +103,7 @@ class _ModifyProfileState extends State<ModifyProfile> {
                             },
                             onSaved: (text){
                               if(text!=null){
-                                auth.currentUser!.updateDisplayName(text);
+                                context.read<AuthProvider>().modifyName(text);
                               }
                             },
                           ),

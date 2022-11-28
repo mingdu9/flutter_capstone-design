@@ -30,7 +30,7 @@ class _LoginState extends State<Login> {
     if(flag){
       // GoRouter.of(context).replace('/mainTab/0');
       if(auth.currentUser!.emailVerified){
-        GoRouter.of(context).replace('/mainTab/0');
+        GoRouter.of(context).go('/');
       }else{
         context.read<AuthProvider>().logout();
         _pwController.clear();
@@ -222,7 +222,6 @@ class _SignUpState extends State<SignUp> {
     );
     print(auth.currentUser);
     if(flag){
-      // GoRouter.of(context).pop();
       showDialog(context: context, builder: (context){
         return Dialog(
           shape: RoundedRectangleBorder(
@@ -251,6 +250,7 @@ class _SignUpState extends State<SignUp> {
                 TextButton(
                     onPressed: (){
                       GoRouter.of(context).pop();
+                      GoRouter.of(context).go('/tutorial');
                     },
                     style: TextButton.styleFrom(
                         splashFactory: NoSplash.splashFactory,

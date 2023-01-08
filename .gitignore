@@ -48,3 +48,9 @@ app.*.map.json
 #resources
 /images
 /lib/constant
+
+#secret keys
+/lib/firebase_options.dart
+/flutter_native_splash.yaml
+/android/firebase_app_id_file.json
+/ios/firebase_app_id_file.json
